@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "LTexture.h"
+
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
@@ -23,18 +25,15 @@ SDL_Window *gWindow = NULL;
 //The window renderer
 SDL_Renderer *gRenderer = NULL;
 
+//Scene textures
+LTexture gFooTexture(&gRenderer);
+LTexture gBackgroundTexture(&gRenderer);
+
 //Current displayed texture
 SDL_Texture *gTexture = NULL;
 
 //The surface contained by the window
 SDL_Surface *gScreenSurface = NULL;
-SDL_Surface *gHelloWorldImage = NULL;
-
-//The images that correspond to a keypress
-SDL_Surface *gKeyPressSurfaces[KEY_PRESS_SURFACE_TOTAL];
-
-//Current displayed image
-SDL_Surface *gCurrentSurface = NULL;
 
 bool init()
 {
@@ -100,97 +99,35 @@ SDL_Texture *loadTexture(std::string path)
     return newTexture;
 }
 
-SDL_Surface *loadSurface(std::string path)
-{
-    SDL_Surface *optimizedSurface = NULL;
-
-    //Load image at specified path
-    SDL_Surface *loadedSurface = IMG_Load(path.c_str());
-    if (loadedSurface == NULL)
-    {
-        printf("Unable to load image %s! SDL Error: %s\n", path.c_str(), IMG_GetError());
-        return NULL;
-    }
-
-    optimizedSurface = SDL_ConvertSurface(loadedSurface, gScreenSurface->format, 0);
-    if (optimizedSurface == NULL)
-    {
-        printf("Unable to optimize image %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-    }
-
-    //Get rid of old loaded surface
-    SDL_FreeSurface(loadedSurface);
-
-    return optimizedSurface;
-}
-
-bool loadMedia_Surfaces()
-{
-    //Loading success flag
-    bool success = true;
-
-    //Load default surface
-    gKeyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] = loadSurface("assets/DungeonTilesetV2.png");
-    if (gKeyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT] == NULL)
-    {
-        printf("Failed to load default image!\n");
-        success = false;
-    }
-
-    //Load up surface
-    gKeyPressSurfaces[KEY_PRESS_SURFACE_UP] = loadSurface("assets/up.bmp");
-    if (gKeyPressSurfaces[KEY_PRESS_SURFACE_UP] == NULL)
-    {
-        printf("Failed to load up image!\n");
-        success = false;
-    }
-
-    //Load down surface
-    gKeyPressSurfaces[KEY_PRESS_SURFACE_DOWN] = loadSurface("assets/down.bmp");
-    if (gKeyPressSurfaces[KEY_PRESS_SURFACE_DOWN] == NULL)
-    {
-        printf("Failed to load down image!\n");
-        success = false;
-    }
-
-    //Load left surface
-    gKeyPressSurfaces[KEY_PRESS_SURFACE_LEFT] = loadSurface("assets/left.bmp");
-    if (gKeyPressSurfaces[KEY_PRESS_SURFACE_LEFT] == NULL)
-    {
-        printf("Failed to load left image!\n");
-        success = false;
-    }
-
-    //Load right surface
-    gKeyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] = loadSurface("assets/right.bmp");
-    if (gKeyPressSurfaces[KEY_PRESS_SURFACE_RIGHT] == NULL)
-    {
-        printf("Failed to load right image!\n");
-        success = false;
-    }
-
-    return success;
-}
-
 bool loadMedia()
 {
     //Loading success flag
     bool success = true;
 
-    //Load PNG texture
-    gTexture = loadTexture("assets/DungeonTilesetV2.png");
-    if (gTexture == NULL)
-    {
-        printf("Failed to load texture image!\n");
-        return false;
-    }
+    gTexture = loadTexture("assets/background.png");
+
+    // //Load Foo' texture
+    // if (!gFooTexture.loadFromFile("assets/foo.png"))
+    // {
+    //     printf("Failed to load Foo' texture image!\n");
+    //     success = false;
+    // }
+
+    // //Load background texture
+    // if (!gBackgroundTexture.loadFromFile("assets/background.png"))
+    // {
+    //     printf("Failed to load background texture image!\n");
+    //     success = false;
+    // }
 
     return success;
 }
 
 void close()
 {
-    //Free loaded image
+    //Free loaded images
+    //delete &gFooTexture;
+    //delete &gBackgroundTexture;
     SDL_DestroyTexture(gTexture);
     gTexture = NULL;
 
@@ -240,34 +177,21 @@ int main(int argc, char *args[])
                 case SDLK_ESCAPE:
                     quit = true;
                     break;
-                    // case SDLK_UP:
-                    //     gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_UP];
-                    //     break;
-
-                    // case SDLK_DOWN:
-                    //     gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DOWN];
-                    //     break;
-
-                    // case SDLK_LEFT:
-                    //     gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_LEFT];
-                    //     break;
-
-                    // case SDLK_RIGHT:
-                    //     gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_RIGHT];
-                    //     break;
-
-                    // default:
-                    //     gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT];
-                    //     break;
                 }
             }
         }
 
         //Clear screen
+        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(gRenderer);
 
-        //Render texture to screen
         SDL_RenderCopy(gRenderer, gTexture, NULL, NULL);
+
+        //Render background texture to screen
+        //gBackgroundTexture.render(0, 0);
+
+        //Render Foo' to the screen
+        //gFooTexture.render(240, 190);
 
         //Update screen
         SDL_RenderPresent(gRenderer);
