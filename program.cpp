@@ -5,19 +5,11 @@
 #include <fstream>
 
 #include "LTexture.h"
+#include "src/AnimatedSprite.h"
+#include "src/AnimationKey.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
-
-enum KeyPressSurfaces
-{
-    KEY_PRESS_SURFACE_DEFAULT,
-    KEY_PRESS_SURFACE_UP,
-    KEY_PRESS_SURFACE_DOWN,
-    KEY_PRESS_SURFACE_LEFT,
-    KEY_PRESS_SURFACE_RIGHT,
-    KEY_PRESS_SURFACE_TOTAL
-};
 
 // Global Window
 SDL_Window *gWindow = NULL;
@@ -203,6 +195,20 @@ int main(int argc, char *args[])
     //Flip type
     SDL_RendererFlip flipType = SDL_FLIP_NONE;
 
+    SDL_Point frameSize = {16, 28};
+    std::map<AnimationKey, Animation *> animations = {
+        {IdleUp, &Animation(4, 4, frameSize, {128, 36})},
+        {IdleDown, &Animation(4, 4, frameSize, {128, 36})},
+        {IdleLeft, &Animation(4, 4, frameSize, {128, 36})},
+        {IdleRight, &Animation(4, 4, frameSize, {128, 36})},
+        {WalkUp, &Animation(4, 4, frameSize, {192, 36})},
+        {WalkDown, &Animation(4, 4, frameSize, {192, 36})},
+        {WalkLeft, &Animation(4, 4, frameSize, {192, 36})},
+        {WalkRight, &Animation(4, 4, frameSize, {192, 36})}};
+
+    AnimatedSprite playerSprite = AnimatedSprite(&gRenderer, "assets/DungeonTilesetV2.png", animations, IdleUp, {50, 50});
+
+    // TODO: Need gametime for animation frames
     while (!quit)
     {
         while (SDL_PollEvent(&event) != 0)
@@ -248,14 +254,17 @@ int main(int argc, char *args[])
         SDL_RenderClear(gRenderer);
 
         //Render background texture to screen
-        gBackgroundTexture.render(0, 0);
+        //gBackgroundTexture.render(0, 0);
 
         //Render Foo' to the screen
-        gFooTexture.render(240, 190);
+        //gFooTexture.render(240, 190);
 
         //Render current frame
         SDL_Rect *currentClip = &gSpriteClips[frame / 6];
         gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip, degrees, NULL, flipType);
+
+        playerSprite.UpdateAnimation(playerSprite.currentAnimationKey, SDL_GetTicks());
+        playerSprite.Draw();
 
         //Update screen
         SDL_RenderPresent(gRenderer);
