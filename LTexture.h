@@ -21,12 +21,11 @@ public:
     //Deallocates memory
     ~LTexture()
     {
-        freeTexture();
-        free(gRenderer);
+        free();
     }
 
     //Deallocates texture
-    void freeTexture()
+    void free()
     {
         //Free texture if it exists
         if (mTexture != NULL)
@@ -52,7 +51,16 @@ public:
     bool loadFromFile(std::string path);
 
     //Renders texture at given point
-    void render(int x, int y);
+    void render(int x, int y, SDL_Rect *clip = NULL);
+
+    //Set color modulation
+    void setColor(Uint8 red, Uint8 green, Uint8 blue);
+
+    //Set blending
+    void setBlendMode(SDL_BlendMode blending);
+
+    //Set alpha modulation
+    void setAlpha(Uint8 alpha);
 
 private:
     // The Global Renderer
@@ -66,17 +74,44 @@ private:
     int mHeight;
 };
 
-void LTexture::render(int x, int y)
+void LTexture::render(int x, int y, SDL_Rect *clip)
 {
     //Set rendering space and render to screen
     SDL_Rect renderQuad = {x, y, mWidth, mHeight};
-    SDL_RenderCopy(*gRenderer, mTexture, NULL, &renderQuad);
+
+    //Set clip rendering dimensions
+    if (clip != NULL)
+    {
+        renderQuad.w = clip->w;
+        renderQuad.h = clip->h;
+    }
+
+    //Render to screen
+    SDL_RenderCopy(*gRenderer, mTexture, clip, &renderQuad);
+}
+
+void LTexture::setColor(Uint8 red, Uint8 green, Uint8 blue)
+{
+    //Modulate texture
+    SDL_SetTextureColorMod(mTexture, red, green, blue);
+}
+
+void LTexture::setBlendMode(SDL_BlendMode blending)
+{
+    //Set blending function
+    SDL_SetTextureBlendMode(mTexture, blending);
+}
+
+void LTexture::setAlpha(Uint8 alpha)
+{
+    //Modulate texture alpha
+    SDL_SetTextureAlphaMod(mTexture, alpha);
 }
 
 bool LTexture::loadFromFile(std::string path)
 {
     //Get rid of preexisting texture
-    freeTexture();
+    free();
 
     //The final texture
     SDL_Texture *newTexture = NULL;
