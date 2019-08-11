@@ -256,6 +256,7 @@ int main(int argc, char *args[])
             frame = 0;
         }
 
+        printf("Update %f \n", currentTick);
         player->Update(currentTick);
         player->Draw();
 

@@ -62,6 +62,10 @@ inline void Vec2::make_unit_vector()
 
 inline void Vec2::normalize()
 {
+    if (e[0] == 0 && e[1] == 0)
+    {
+        return;
+    }
     float k = 1.0 / sqrt(e[0] * e[0] + e[1] * e[1]);
     e[0] *= k;
     e[1] *= k;
