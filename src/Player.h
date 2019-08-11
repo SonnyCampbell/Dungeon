@@ -35,20 +35,21 @@ public:
     ~Player()
     {
         delete sprite;
+        delete direction;
     }
 
     void Draw();
-    void Update(double currentTick);
-    void MovePlayer(Vec2 movementVector, float dt);
+    void Update(double currentTick, float dt);
+    //void MovePlayer(Vec2 movementVector, float dt);
     void HandleInputEvent(const SDL_Event &event, float dt);
-    void DoThing(Vec2 movementVector);
+    void UpdateDirection(Vec2 movementVector);
 };
 
-void Player::Update(double currentTick)
+void Player::Update(double currentTick, float dt)
 {
     Vec2 currentDirection = Vec2(direction->x(), direction->y());
     currentDirection.normalize();
-    position = position + (currentDirection * 2.5);
+    position = position + (currentDirection * speed * dt);
 
     sprite->UpdateAnimation(sprite->currentAnimationKey, currentTick);
 }
@@ -60,95 +61,45 @@ void Player::Draw()
 
 void Player::HandleInputEvent(const SDL_Event &event, float dt)
 {
-    printf("HandleEvent \n");
-    // const Uint8 *keys = SDL_GetKeyboardState(NULL);
-
-    // if (keys[SDL_SCANCODE_W])
-    // {
-    //     MovePlayer(Vec2(0, -1), dt);
-    // }
-    // else if (keys[SDL_SCANCODE_S])
-    // {
-    //     MovePlayer(Vec2(0, 1), dt);
-    // }
-    // else if (keys[SDL_SCANCODE_A])
-    // {
-    //     MovePlayer(Vec2(-1, 0), dt);
-    // }
-    // else if (keys[SDL_SCANCODE_D])
-    // {
-    //     printf("Move Right \n");
-    //     MovePlayer(Vec2(1, 0), dt);
-    // }
-
     if (event.type == SDL_KEYDOWN && event.key.repeat == 0)
     {
-        //Select surfaces based on key press
         switch (event.key.keysym.sym)
         {
-        // case SDLK_ESCAPE:
-        //     quit = true;
-        //     break;
         case SDLK_w:
-            //flipType = SDL_FLIP_NONE;
-
-            DoThing(Vec2(0, -1));
+            UpdateDirection(Vec2(0, -1));
             break;
         case SDLK_s:
-            //degrees += 60;
-            DoThing(Vec2(0, 1));
+            UpdateDirection(Vec2(0, 1));
             break;
         case SDLK_a:
-            //degrees -= 60;
-            DoThing(Vec2(-1, 0));
+            UpdateDirection(Vec2(-1, 0));
             break;
         case SDLK_d:
-            //degrees += 60;
-            printf("Move Right \n");
-            DoThing(Vec2(1, 0));
+            UpdateDirection(Vec2(1, 0));
             break;
         }
     }
     else if (event.type == SDL_KEYUP && event.key.repeat == 0)
     {
-        //Select surfaces based on key press
         switch (event.key.keysym.sym)
         {
-        // case SDLK_ESCAPE:
-        //     quit = true;
-        //     break;
         case SDLK_w:
-            //flipType = SDL_FLIP_NONE;
-
-            DoThing(Vec2(0, 1));
+            UpdateDirection(Vec2(0, 1));
             break;
         case SDLK_s:
-            //degrees += 60;
-            DoThing(Vec2(0, -1));
+            UpdateDirection(Vec2(0, -1));
             break;
         case SDLK_a:
-            //degrees -= 60;
-            DoThing(Vec2(1, 0));
+            UpdateDirection(Vec2(1, 0));
             break;
         case SDLK_d:
-            //degrees += 60;
-            printf("Move Right \n");
-            DoThing(Vec2(-1, 0));
+            UpdateDirection(Vec2(-1, 0));
             break;
         }
     }
 }
 
-void Player::MovePlayer(Vec2 movementVector, float dt)
-{
-    movementVector.normalize();
-    Vec2 vel = movementVector * 2.5f;
-    printf("Position: %f %f \n", position.x(), position.y());
-    printf("Vel: %f %f \n", vel.x(), vel.y());
-    position += vel;
-}
-
-void Player::DoThing(Vec2 movementVector)
+void Player::UpdateDirection(Vec2 movementVector)
 {
     *direction += movementVector;
 }
