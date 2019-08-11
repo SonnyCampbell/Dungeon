@@ -171,6 +171,47 @@ void close()
     SDL_Quit();
 }
 
+void HandleInput(SDL_Event &event, bool &quit)
+{
+    while (SDL_PollEvent(&event) != 0)
+    {
+        if (event.type == SDL_QUIT)
+        {
+            quit = true;
+        }
+        //User presses a key
+        else if (event.type == SDL_KEYDOWN)
+        {
+            //Select surfaces based on key press
+            switch (event.key.keysym.sym)
+            {
+            case SDLK_ESCAPE:
+                quit = true;
+                break;
+            case SDLK_a:
+                //degrees -= 60;
+                break;
+
+            case SDLK_d:
+                //degrees += 60;
+                break;
+
+            case SDLK_q:
+                //flipType = SDL_FLIP_HORIZONTAL;
+                break;
+
+            case SDLK_w:
+                //flipType = SDL_FLIP_NONE;
+                break;
+
+            case SDLK_e:
+                //flipType = SDL_FLIP_VERTICAL;
+                break;
+            }
+        }
+    }
+}
+
 int main(int argc, char *args[])
 {
 
@@ -203,43 +244,8 @@ int main(int argc, char *args[])
     // TODO: Need gametime for animation frames
     while (!quit)
     {
-        while (SDL_PollEvent(&event) != 0)
-        {
-            if (event.type == SDL_QUIT)
-            {
-                quit = true;
-            }
-            //User presses a key
-            else if (event.type == SDL_KEYDOWN)
-            {
-                //Select surfaces based on key press
-                switch (event.key.keysym.sym)
-                {
-                case SDLK_ESCAPE:
-                    quit = true;
-                    break;
-                case SDLK_a:
-                    degrees -= 60;
-                    break;
 
-                case SDLK_d:
-                    degrees += 60;
-                    break;
-
-                case SDLK_q:
-                    flipType = SDL_FLIP_HORIZONTAL;
-                    break;
-
-                case SDLK_w:
-                    flipType = SDL_FLIP_NONE;
-                    break;
-
-                case SDLK_e:
-                    flipType = SDL_FLIP_VERTICAL;
-                    break;
-                }
-            }
-        }
+        HandleInput(event, quit);
 
         //Clear screen
         SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
