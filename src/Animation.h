@@ -1,12 +1,11 @@
 #pragma once
 #include <SDL.h>
-#include <chrono>
 
 class Animation
 {
 private:
 public:
-    SDL_Rect frames[4];
+    SDL_Rect *frames;
     int framesCount;
     int fps = 60;
     int currentFrame;
@@ -19,7 +18,7 @@ public:
         //frames = aFrames;
         size = aSize;
         framesCount = aFramesCount;
-        //frames = new SDL_Rect[framesCount];
+        frames = new SDL_Rect[framesCount];
 
         for (int i = 0; i < framesCount; i++)
         {
@@ -33,7 +32,7 @@ public:
     }
     ~Animation()
     {
-        //delete frames;
+        delete frames;
     }
 
     SDL_Rect CurrentFrame()

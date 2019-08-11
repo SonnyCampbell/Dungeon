@@ -7,6 +7,7 @@
 #include "LTexture.h"
 #include "src/AnimatedSprite.h"
 #include "src/AnimationKey.h"
+#include "src/Player.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -28,6 +29,8 @@ LTexture gSpriteSheetTexture(&gRenderer);
 
 //The surface contained by the window
 SDL_Surface *gScreenSurface = NULL;
+
+Player *player = NULL;
 
 bool init()
 {
@@ -195,18 +198,7 @@ int main(int argc, char *args[])
     //Flip type
     SDL_RendererFlip flipType = SDL_FLIP_NONE;
 
-    SDL_Point frameSize = {16, 28};
-    std::map<AnimationKey, Animation *> animations = {
-        {IdleUp, &Animation(4, 4, frameSize, {128, 36})},
-        {IdleDown, &Animation(4, 4, frameSize, {128, 36})},
-        {IdleLeft, &Animation(4, 4, frameSize, {128, 36})},
-        {IdleRight, &Animation(4, 4, frameSize, {128, 36})},
-        {WalkUp, &Animation(4, 4, frameSize, {192, 36})},
-        {WalkDown, &Animation(4, 4, frameSize, {192, 36})},
-        {WalkLeft, &Animation(4, 4, frameSize, {192, 36})},
-        {WalkRight, &Animation(4, 4, frameSize, {192, 36})}};
-
-    AnimatedSprite playerSprite = AnimatedSprite(&gRenderer, "assets/DungeonTilesetV2.png", animations, IdleUp, {50, 50});
+    player = new Player(&gRenderer, {50, 50});
 
     // TODO: Need gametime for animation frames
     while (!quit)
@@ -263,8 +255,8 @@ int main(int argc, char *args[])
         SDL_Rect *currentClip = &gSpriteClips[frame / 6];
         gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip, degrees, NULL, flipType);
 
-        playerSprite.UpdateAnimation(playerSprite.currentAnimationKey, SDL_GetTicks());
-        playerSprite.Draw();
+        player->Update();
+        player->Draw();
 
         //Update screen
         SDL_RenderPresent(gRenderer);

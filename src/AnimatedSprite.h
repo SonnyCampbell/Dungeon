@@ -14,34 +14,31 @@ private:
     /* data */
 public:
     LTexture texture;
-    std::map<AnimationKey, Animation *> animations;
+    std::map<AnimationKey, Animation *> *animations;
     AnimationKey currentAnimationKey;
-    SDL_Point position;
     bool isAnimating;
-    float speed;
     bool facingRight;
 
-    AnimatedSprite(SDL_Renderer **renderer, std::string texturePath, std::map<AnimationKey, Animation *> _animations, AnimationKey _animationKey, SDL_Point _position, float speed = 166.0f) : texture(renderer)
+    AnimatedSprite(SDL_Renderer **renderer, std::string texturePath, std::map<AnimationKey, Animation *> *_animations, AnimationKey _animationKey) : texture(renderer)
     {
         if (!texture.loadFromFile(texturePath))
         {
             printf("fuck");
         }
         animations = _animations;
-        position = _position;
         currentAnimationKey = _animationKey;
         isAnimating = true;
-        speed = 166.0f;
         facingRight = true;
     }
 
     ~AnimatedSprite()
     {
+        delete animations;
     }
 
     Animation *CurrentAnimation()
     {
-        return animations[currentAnimationKey];
+        return animations->at(currentAnimationKey);
     }
 
     SDL_Point Size()
@@ -51,26 +48,25 @@ public:
 
     void ResetAnimation(AnimationKey key)
     {
-        animations[key]->Reset();
+        animations->at(key)->Reset();
     }
 
     Animation *UpdateAnimation(AnimationKey key, double elapsedGameTime)
     {
         if (isAnimating)
         {
-            printf("Elapsed time: %f \n", elapsedGameTime);
-            return animations[key]->Update(elapsedGameTime);
+            return animations->at(key)->Update(elapsedGameTime);
         }
         else
         {
-            return animations[key];
+            return animations->at(key);
         }
     }
 
-    void Draw()
+    void Draw(SDL_Point position)
     {
-        SDL_Rect *currentClip = &CurrentAnimation()->CurrentFrame();
+        SDL_Rect currentClip = CurrentAnimation()->CurrentFrame();
 
-        texture.render((800 - currentClip->w - 50) / 2, (600 - currentClip->h) / 2, currentClip, NULL, NULL, SDL_FLIP_NONE);
+        texture.render(position.x, position.y, &currentClip, NULL, NULL, SDL_FLIP_NONE);
     }
 };
