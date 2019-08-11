@@ -1,6 +1,9 @@
 #pragma once
 #include <map>
 #include <SDL.h>
+#include <stdio.h>
+#include <iostream>
+
 #include "LTexture.h"
 #include "AnimationKey.h"
 #include "Animation.h"
@@ -55,6 +58,7 @@ public:
     {
         if (isAnimating)
         {
+            printf("Elapsed time: %f \n", elapsedGameTime);
             return animations[key]->Update(elapsedGameTime);
         }
         else

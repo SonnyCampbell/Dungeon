@@ -10,7 +10,7 @@ public:
     int framesCount;
     int fps = 60;
     int currentFrame;
-    double frameTimer;
+    double lastFrameTime;
     double frameLength;
     SDL_Point size;
 
@@ -28,7 +28,7 @@ public:
 
         fps = aFps;
         currentFrame = 0;
-        frameTimer = 0;
+        lastFrameTime = 0;
         frameLength = 1000 * (1.0f / fps);
     }
     ~Animation()
@@ -48,22 +48,18 @@ public:
     void Reset()
     {
         currentFrame = 0;
-        frameTimer = 0;
+        lastFrameTime = 0;
     }
 
     Animation *Update(double elapsedGameTime)
     {
-        double currentTime = frameTimer + elapsedGameTime;
-        if (currentTime > frameLength)
+        //double currentTime = lastFrameTime + elapsedGameTime;
+        if (elapsedGameTime - lastFrameTime > frameLength)
         {
-            frameTimer = 0;
+            lastFrameTime = elapsedGameTime;
             currentFrame = (currentFrame + 1) % framesCount;
         }
-        else
-        {
-            frameTimer = currentTime;
-            currentFrame = currentFrame;
-        }
+
         return this;
     }
 };
