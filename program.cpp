@@ -12,6 +12,10 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
+double lastTick = 0;
+double currentTick = 0;
+float dt = 0.0f;
+
 // Global Window
 SDL_Window *gWindow = NULL;
 
@@ -179,7 +183,6 @@ void HandleInput(SDL_Event &event, bool &quit)
         {
             quit = true;
         }
-        //User presses a key
         else if (event.type == SDL_KEYDOWN)
         {
             //Select surfaces based on key press
@@ -188,27 +191,10 @@ void HandleInput(SDL_Event &event, bool &quit)
             case SDLK_ESCAPE:
                 quit = true;
                 break;
-            case SDLK_a:
-                //degrees -= 60;
-                break;
-
-            case SDLK_d:
-                //degrees += 60;
-                break;
-
-            case SDLK_q:
-                //flipType = SDL_FLIP_HORIZONTAL;
-                break;
-
-            case SDLK_w:
-                //flipType = SDL_FLIP_NONE;
-                break;
-
-            case SDLK_e:
-                //flipType = SDL_FLIP_VERTICAL;
-                break;
             }
         }
+
+        player->HandleInputEvent(event, dt);
     }
 }
 
@@ -233,9 +219,6 @@ int main(int argc, char *args[])
     //Current animation frame
     int frame = 0;
 
-    //Angle of rotation
-    double degrees = 0;
-
     //Flip type
     SDL_RendererFlip flipType = SDL_FLIP_NONE;
 
@@ -244,6 +227,9 @@ int main(int argc, char *args[])
     // TODO: Need gametime for animation frames
     while (!quit)
     {
+        currentTick = SDL_GetTicks();
+        dt = (currentTick - lastTick) / 1000.0f;
+        lastTick = currentTick;
 
         HandleInput(event, quit);
 
@@ -259,13 +245,7 @@ int main(int argc, char *args[])
 
         //Render current frame
         SDL_Rect *currentClip = &gSpriteClips[frame / 6];
-        gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip, degrees, NULL, flipType);
-
-        player->Update();
-        player->Draw();
-
-        //Update screen
-        SDL_RenderPresent(gRenderer);
+        gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip, NULL, NULL, flipType);
 
         //Go to next frame
         ++frame;
@@ -275,6 +255,12 @@ int main(int argc, char *args[])
         {
             frame = 0;
         }
+
+        player->Update(currentTick);
+        player->Draw();
+
+        //Update screen
+        SDL_RenderPresent(gRenderer);
     }
 
     close();

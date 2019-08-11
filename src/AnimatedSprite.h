@@ -7,6 +7,7 @@
 #include "LTexture.h"
 #include "AnimationKey.h"
 #include "Animation.h"
+#include "Vec2.h"
 
 class AnimatedSprite
 {
@@ -41,7 +42,7 @@ public:
         return animations->at(currentAnimationKey);
     }
 
-    SDL_Point Size()
+    Vec2 Size()
     {
         return CurrentAnimation()->size;
     }
@@ -63,10 +64,10 @@ public:
         }
     }
 
-    void Draw(SDL_Point position)
+    void Draw(Vec2 position)
     {
         SDL_Rect currentClip = CurrentAnimation()->CurrentFrame();
 
-        texture.render(position.x, position.y, &currentClip, NULL, NULL, SDL_FLIP_NONE);
+        texture.renderF(position.x(), position.y(), &currentClip, NULL, NULL, SDL_FLIP_NONE);
     }
 };

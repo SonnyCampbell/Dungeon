@@ -1,6 +1,8 @@
 #pragma once
 #include <SDL.h>
 
+#include "Vec2.h"
+
 class Animation
 {
 private:
@@ -11,21 +13,21 @@ public:
     int currentFrame;
     double lastFrameTime;
     double frameLength;
-    SDL_Point size;
+    Vec2 size;
 
-    Animation(int aFramesCount, int aFps, SDL_Point aSize, SDL_Point offset)
+    Animation(int _framesCount, int _fps, Vec2 _size, Vec2 offset)
     {
         //frames = aFrames;
-        size = aSize;
-        framesCount = aFramesCount;
+        size = _size;
+        framesCount = _framesCount;
         frames = new SDL_Rect[framesCount];
 
         for (int i = 0; i < framesCount; i++)
         {
-            frames[i] = {offset.x + (size.x * i), offset.y, size.x, size.y};
+            frames[i] = {(int)(offset.x() + (size.x() * i)), (int)offset.y(), (int)size.x(), (int)size.y()};
         }
 
-        fps = aFps;
+        fps = _fps;
         currentFrame = 0;
         lastFrameTime = 0;
         frameLength = 1000 * (1.0f / fps);

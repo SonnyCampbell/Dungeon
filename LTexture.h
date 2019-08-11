@@ -52,6 +52,7 @@ public:
 
     //Renders texture at given point
     void render(int x, int y, SDL_Rect *clip = NULL, double angle = 0.0, SDL_Point *center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
+    void renderF(float x, float y, SDL_Rect *clip, double angle, SDL_FPoint *center, SDL_RendererFlip flip);
 
     //Set color modulation
     void setColor(Uint8 red, Uint8 green, Uint8 blue);
@@ -88,6 +89,22 @@ void LTexture::render(int x, int y, SDL_Rect *clip, double angle, SDL_Point *cen
 
     //Render to screen
     SDL_RenderCopyEx(*gRenderer, mTexture, clip, &renderQuad, angle, center, flip);
+}
+
+void LTexture::renderF(float x, float y, SDL_Rect *clip, double angle, SDL_FPoint *center, SDL_RendererFlip flip)
+{
+    //Set rendering space and render to screen
+    SDL_FRect renderQuad = {x, y, (float)mWidth, (float)mHeight};
+
+    //Set clip rendering dimensions
+    if (clip != NULL)
+    {
+        renderQuad.w = clip->w;
+        renderQuad.h = clip->h;
+    }
+
+    //Render to screen
+    SDL_RenderCopyExF(*gRenderer, mTexture, clip, &renderQuad, angle, center, flip);
 }
 
 void LTexture::setColor(Uint8 red, Uint8 green, Uint8 blue)
