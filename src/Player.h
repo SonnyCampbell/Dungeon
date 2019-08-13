@@ -29,7 +29,7 @@ public:
                                                                                                    {WalkLeft, new Animation(4, runFps, frameSize, {192, 36})},
                                                                                                    {WalkRight, new Animation(4, runFps, frameSize, {192, 36})}});
 
-        sprite = new AnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, IdleUp);
+        sprite = new AnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, WalkUp);
     }
 
     ~Player()
@@ -48,8 +48,24 @@ public:
 void Player::Update(double currentTick, float dt)
 {
     Vec2 currentDirection = Vec2(direction->x(), direction->y());
-    currentDirection.normalize();
-    position = position + (currentDirection * speed * dt);
+
+    if (currentDirection.x() == 0 && currentDirection.y() == 0)
+    {
+        if (sprite->currentAnimationKey != IdleUp)
+        {
+            sprite->ResetAnimation(IdleUp);
+        }
+    }
+    else
+    {
+        currentDirection.normalize();
+        position = position + (currentDirection * speed * dt);
+
+        if (sprite->currentAnimationKey != WalkUp)
+        {
+            sprite->ResetAnimation(WalkUp);
+        }
+    }
 
     sprite->UpdateAnimation(sprite->currentAnimationKey, currentTick);
 }
@@ -72,9 +88,11 @@ void Player::HandleInputEvent(const SDL_Event &event, float dt)
             UpdateDirection(Vec2(0, 1));
             break;
         case SDLK_a:
+            sprite->facingRight = false;
             UpdateDirection(Vec2(-1, 0));
             break;
         case SDLK_d:
+            sprite->facingRight = true; //Maybe put this in update and do it based on direction vector to prevent moonwalking. Looks fun to moonwalk though.
             UpdateDirection(Vec2(1, 0));
             break;
         }

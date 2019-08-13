@@ -49,6 +49,7 @@ public:
 
     void ResetAnimation(AnimationKey key)
     {
+        currentAnimationKey = key;
         animations->at(key)->Reset();
     }
 
@@ -68,6 +69,13 @@ public:
     {
         SDL_Rect currentClip = CurrentAnimation()->CurrentFrame();
 
-        texture.renderF(position.x(), position.y(), &currentClip, NULL, NULL, SDL_FLIP_NONE);
+        if (facingRight)
+        {
+            texture.renderF(position.x(), position.y(), &currentClip, NULL, NULL, SDL_FLIP_NONE);
+        }
+        else
+        {
+            texture.renderF(position.x(), position.y(), &currentClip, NULL, NULL, SDL_FLIP_HORIZONTAL);
+        }
     }
 };
