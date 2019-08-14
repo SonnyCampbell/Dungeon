@@ -47,6 +47,11 @@ public:
         return mHeight;
     }
 
+    SDL_Texture *getTexture()
+    {
+        return mTexture;
+    }
+
     //Loads image at specified path
     bool loadFromFile(std::string path);
 

@@ -8,6 +8,7 @@
 #include "src/AnimatedSprite.h"
 #include "src/AnimationKey.h"
 #include "src/Player.h"
+#include "src/TMXLoader/TMXLoader.h",
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -21,6 +22,8 @@ SDL_Window *gWindow = NULL;
 
 //The window renderer
 SDL_Renderer *gRenderer = NULL;
+
+auto loader = new TMXLoader();
 
 //Scene textures
 LTexture gFooTexture(&gRenderer);
@@ -105,6 +108,8 @@ bool loadMedia()
     //Loading success flag
     bool success = true;
 
+    loader->loadMap("Map1", "assets/Map1.tmx");
+
     //Load Foo' texture
     if (!gFooTexture.loadFromFile("assets/foo.png"))
     {
@@ -175,6 +180,41 @@ void close()
     SDL_Quit();
 }
 
+void render(SDL_Renderer *renderer, SDL_Texture *texture, TMXLoader *loader)
+{
+    char tileID = 0;
+
+    TMXMap *map1 = loader->getMap("Map1");
+
+    int tileWidth = map1->getTileWidth();
+    int tileHeight = map1->getTileHeight();
+
+    for (int i = 0; i < map1->getWidth(); ++i)
+    {
+        for (int j = 0; j < map1->getHeight(); ++j)
+        {
+            // get the tile at current position
+
+            auto layers = map1->getTileLayers();
+
+            for (unsigned int index = 0; index < layers->size(); ++index)
+            {
+                tileID = layers->at(index).getTileVector()[i][j];
+
+                // only render if it is an actual tile (tileID = 0 means no tile / don't render anything here)
+                if (tileID > 0)
+                {
+                    SDL_Rect srcrect = {((tileID - 1) % 3) * tileWidth, ((tileID - 1) / 3) * tileHeight, tileWidth, tileHeight};
+                    SDL_Rect dstrect = {j * 25, i * 25, 25, 25};
+                    SDL_RenderCopy(renderer, texture, &srcrect, &dstrect);
+                }
+            }
+        }
+    }
+
+    SDL_RenderPresent(renderer);
+}
+
 void HandleInput(SDL_Event &event, bool &quit)
 {
     while (SDL_PollEvent(&event) != 0)
@@ -236,6 +276,8 @@ int main(int argc, char *args[])
         //Clear screen
         SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(gRenderer);
+
+        render(gRenderer, gSpriteSheetTexture.getTexture(), loader);
 
         //Render background texture to screen
         //gBackgroundTexture.render(0, 0);
