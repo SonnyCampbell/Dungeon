@@ -32,6 +32,7 @@
 #include "TMXTileLayer.h"
 #include "TMXTileSet.h"
 #include "TMXTile.h"
+#include "TMXConstants.h"
 
 class TMXLoader
 {

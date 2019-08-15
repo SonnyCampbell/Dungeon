@@ -8,7 +8,7 @@
 #include "src/AnimatedSprite.h"
 #include "src/AnimationKey.h"
 #include "src/Player.h"
-#include "src/TMXLoader/TMXLoader.h",
+#include "src/TMXLoader/TMXLoader.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;

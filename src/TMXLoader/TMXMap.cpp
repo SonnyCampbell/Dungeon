@@ -35,19 +35,29 @@ TMXMap::~TMXMap()
     std::vector<TMXTileLayer>().swap(m_layerVector);
 }
 
-void TMXMap::setMapSettings(const std::vector<std::string> &mapData, const std::unordered_map<std::string, std::string> &propertiesMap)
+void TMXMap::setMapSettings(const std::unordered_map<std::string, std::string> &mapProperties, const std::unordered_map<std::string, std::string> &propertiesMap)
 {
-    m_version = stoi(mapData[0]);
-    m_tiled_version = stoi(mapData[1]);
-    m_orientation = mapData[2];
-    m_renderOrder = mapData[3];
-    m_width = stoi(mapData[4]);
-    m_height = stoi(mapData[5]);
-    m_tileWidth = stoi(mapData[6]);
-    m_tileHeight = stoi(mapData[7]);
-    m_backgroundColourArray[0] = stoi(mapData[8]);
-    m_backgroundColourArray[1] = stoi(mapData[8]);
-    m_backgroundColourArray[2] = stoi(mapData[8]);
+    m_version = stoi(mapProperties.at(TMXMapProperties::version));
+    m_tiled_version = stoi(mapProperties.at(TMXMapProperties::tiled_version));
+    m_orientation = mapProperties.at(TMXMapProperties::orientation);
+    m_renderOrder = mapProperties.at(TMXMapProperties::render_order);
+    m_width = stoi(mapProperties.at(TMXMapProperties::width));
+    m_height = stoi(mapProperties.at(TMXMapProperties::height));
+    m_tileWidth = stoi(mapProperties.at(TMXMapProperties::tile_width));
+    m_tileHeight = stoi(mapProperties.at(TMXMapProperties::tile_height));
+
+    // Background colour is stored in hexadecimal, next few lines coverts to RGB and pushes onto vector
+    if (mapProperties.find(TMXMapProperties::background_colour) != mapProperties.end())
+    {
+        std::string colourString = mapProperties.at(TMXMapProperties::background_colour);
+        std::string colourSubstring = colourString.substr(1, colourString.length());
+
+        unsigned int colour = stoi(colourSubstring, 0, 16);
+
+        m_backgroundColourArray[0] = colour / 0x10000;
+        m_backgroundColourArray[1] = (colour / 0x100) % 0x100;
+        m_backgroundColourArray[2] = colour / 0x10000;
+    }
 
     m_propertiesMap = propertiesMap;
 }

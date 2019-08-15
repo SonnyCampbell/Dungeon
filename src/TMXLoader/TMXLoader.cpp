@@ -96,31 +96,21 @@ void TMXLoader::printMapData(std::string mapName)
 
 void TMXLoader::loadMapSettings(std::unique_ptr<TMXMap> const &map, rapidxml::xml_node<> *parentNode)
 {
-	// Vector to hold map settings (version, orientation, width, height etc.)
-	std::vector<std::string> mapData;
+	// Map to hold map settings (version, orientation, width, height etc.)
+	std::unordered_map<std::string, std::string> mapProperties;
 
 	// Push found settings onto back of vector, which are attributes of first xml node "map"
 	for (rapidxml::xml_attribute<char> *attr = parentNode->first_attribute(); attr; attr = attr->next_attribute())
 	{
-		mapData.push_back(attr->value());
+		mapProperties.insert({attr->name(), attr->value()});
 	}
 
-	// Background colour is stored in hexadecimal, next few lines coverts to RGB and pushes onto vector
-	std::string colourString = mapData[6];
-	std::string colourSubstring = colourString.substr(1, colourString.length());
-
-	unsigned int colour = stoi(colourSubstring, 0, 16);
-
-	mapData.push_back(std::to_string(colour / 0x10000));
-	mapData.push_back(std::to_string((colour / 0x100) % 0x100));
-	mapData.push_back(std::to_string(colour / 0x10000));
-
-	std::unordered_map<std::string, std::string> propertiesMap;
+	std::unordered_map<std::string, std::string> custromProperties;
 
 	// Load any user-defined properties
-	loadProperties(propertiesMap, parentNode);
+	loadProperties(custromProperties, parentNode);
 
-	map->setMapSettings(mapData, propertiesMap);
+	map->setMapSettings(mapProperties, custromProperties);
 }
 
 void TMXLoader::loadTileSets(std::unique_ptr<TMXMap> const &map, rapidxml::xml_node<> *parentNode)
@@ -138,7 +128,7 @@ void TMXLoader::loadTileSets(std::unique_ptr<TMXMap> const &map, rapidxml::xml_n
 		std::unordered_map<std::string, std::string> tileSetData;
 
 		// Use a map to hold tileset properties
-		std::unordered_map<std::string, std::string> propertiesMap;
+		std::unordered_map<std::string, std::string> custromProperties;
 
 		// Use a vector and map for individual tiles that have properties
 		std::vector<TMXTile> tileVector;
@@ -164,9 +154,9 @@ void TMXLoader::loadTileSets(std::unique_ptr<TMXMap> const &map, rapidxml::xml_n
 			}
 
 			// Clear the properties map of the data from the previous tileset
-			propertiesMap.clear();
+			custromProperties.clear();
 			// Load tileset properties
-			loadProperties(propertiesMap, currentNode);
+			loadProperties(custromProperties, currentNode);
 
 			// Move to the image childnode and read data
 			currentNode = currentNode->first_node("image");
@@ -209,7 +199,7 @@ void TMXLoader::loadTileSets(std::unique_ptr<TMXMap> const &map, rapidxml::xml_n
 			}
 
 			// Pass the new tileset data to the map
-			map->addTileSet(TMXTileSet(tileSetData, propertiesMap, tileVector));
+			map->addTileSet(TMXTileSet(tileSetData, custromProperties, tileVector));
 
 			// Move to the next tileset node and increment the counter
 			if (currentNode->parent()->next_sibling("tileset") == nullptr)
@@ -312,7 +302,7 @@ void TMXLoader::loadLayers(std::unique_ptr<TMXMap> const &map, rapidxml::xml_nod
 	}
 }
 
-void TMXLoader::loadProperties(std::unordered_map<std::string, std::string> &propertiesMap, rapidxml::xml_node<> *parentNode)
+void TMXLoader::loadProperties(std::unordered_map<std::string, std::string> &custromProperties, rapidxml::xml_node<> *parentNode)
 {
 	// Create a new node based on the parent node
 	rapidxml::xml_node<> *currentNode = parentNode;
@@ -328,7 +318,7 @@ void TMXLoader::loadProperties(std::unordered_map<std::string, std::string> &pro
 		// Loop whilst there are property nodes found
 		while (currentNode != nullptr)
 		{
-			propertiesMap[currentNode->first_attribute()->value()] = currentNode->first_attribute()->next_attribute()->value();
+			custromProperties[currentNode->first_attribute()->value()] = currentNode->first_attribute()->next_attribute()->value();
 			currentNode = currentNode->next_sibling("property");
 		}
 	}

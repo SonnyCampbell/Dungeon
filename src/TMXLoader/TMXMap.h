@@ -26,6 +26,7 @@
 
 #include "TMXTileSet.h"
 #include "TMXTileLayer.h"
+#include "TMXConstants.h"
 
 class TMXMap
 {
@@ -36,7 +37,7 @@ public:
 	~TMXMap();
 
 	/* Setter functions for map settings */
-	void setMapSettings(const std::vector<std::string> &mapData, const std::unordered_map<std::string, std::string> &propertiesMap);
+	void setMapSettings(const std::unordered_map<std::string, std::string> &mapProperties, const std::unordered_map<std::string, std::string> &propertiesMap);
 
 	/* Getter functions for map settings */
 public:
