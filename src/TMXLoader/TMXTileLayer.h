@@ -28,7 +28,7 @@ class TMXTileLayer
 {
 	/* Class constructors & destructors */
 public:
-    TMXTileLayer(std::string name, unsigned int width, unsigned int height, std::unordered_map<std::string, std::string> layerProperties,               std::vector<std::vector<unsigned int>> tileVector);
+	TMXTileLayer(std::string name, unsigned int width, unsigned int height, std::unordered_map<std::string, std::string> layerProperties, std::vector<std::vector<unsigned int>> tileVector);
 	~TMXTileLayer();
 
 	/* Getter functions  */
@@ -36,10 +36,10 @@ public:
 	std::string getName();
 	unsigned int getWidth();
 	unsigned int getHeight();
-    std::vector<std::vector<unsigned int>> getTileVector();
-    std::string getPropery(std::string propertyName);
-    
-    /* Debug functions */
+	std::vector<std::vector<unsigned int>> getTileVector();
+	std::string getPropery(std::string propertyName);
+
+	/* Debug functions */
 public:
 	void printData();
 
@@ -48,7 +48,7 @@ private:
 	std::string m_name;
 	unsigned int m_width;
 	unsigned int m_height;
-    std::vector<std::vector<unsigned int>> m_tileVector;
+	std::vector<std::vector<unsigned int>> m_tileVector;
 
 	/* User-defined Properties */
 private:

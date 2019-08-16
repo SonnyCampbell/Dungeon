@@ -180,9 +180,13 @@ void close()
     SDL_Quit();
 }
 
-void render(SDL_Renderer *renderer, SDL_Texture *texture, TMXLoader *loader)
+void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
 {
-    char tileID = 0;
+    //Clear screen
+    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_RenderClear(gRenderer);
+
+    unsigned int tileID = 0;
 
     TMXMap *map1 = loader->getMap("Map1");
 
@@ -204,15 +208,29 @@ void render(SDL_Renderer *renderer, SDL_Texture *texture, TMXLoader *loader)
                 // only render if it is an actual tile (tileID = 0 means no tile / don't render anything here)
                 if (tileID > 0)
                 {
-                    SDL_Rect srcrect = {((tileID - 1) % 3) * tileWidth, ((tileID - 1) / 3) * tileHeight, tileWidth, tileHeight};
-                    SDL_Rect dstrect = {j * 25, i * 25, 25, 25};
-                    SDL_RenderCopy(renderer, texture, &srcrect, &dstrect);
+
+                    SDL_Rect srcrect = {16, 64, tileWidth, tileHeight};
+                    auto destX = i * tileWidth;
+                    auto destY = j * tileHeight;
+                    texture.render(destX, destY, &srcrect);
+                    //SDL_RenderCopy(renderer, texture, &srcrect, &dstrect);
                 }
             }
         }
     }
 
-    SDL_RenderPresent(renderer);
+    //Render background texture to screen
+    //gBackgroundTexture.render(0, 0);
+
+    //Render Foo' to the screen
+    //gFooTexture.render(240, 190);
+
+    // SDL_Rect srcrect = {192, 36, 16, 28};
+    // auto destX = 100;
+    // auto destY = 50;
+    // gSpriteSheetTexture.render(destX, destY, &srcrect);
+
+    player->Draw();
 }
 
 void HandleInput(SDL_Event &event, bool &quit)
@@ -255,7 +273,6 @@ int main(int argc, char *args[])
 
     bool quit = false;
     SDL_Event event;
-
     //Current animation frame
     int frame = 0;
 
@@ -272,12 +289,13 @@ int main(int argc, char *args[])
         lastTick = currentTick;
 
         HandleInput(event, quit);
+        player->Update(currentTick, dt);
 
         //Clear screen
         SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(gRenderer);
 
-        render(gRenderer, gSpriteSheetTexture.getTexture(), loader);
+        render(gRenderer, gSpriteSheetTexture, loader);
 
         //Render background texture to screen
         //gBackgroundTexture.render(0, 0);
@@ -298,8 +316,7 @@ int main(int argc, char *args[])
             frame = 0;
         }
 
-        player->Update(currentTick, dt);
-        player->Draw();
+        //player->Draw();
 
         //Update screen
         SDL_RenderPresent(gRenderer);

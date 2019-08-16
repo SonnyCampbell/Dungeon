@@ -201,7 +201,7 @@ void TMXLoader::loadTileSets(std::unique_ptr<TMXMap> const &map, rapidxml::xml_n
 			// Pass the new tileset data to the map
 			map->addTileSet(TMXTileSet(tileSetData, custromProperties, tileVector));
 
-			// Move to the next tileset node and increment the counter
+			// Move to the next tileset node and increment the counter TODO FIX
 			if (currentNode->parent()->next_sibling("tileset") == nullptr)
 			{
 				break;
@@ -270,7 +270,7 @@ void TMXLoader::loadLayers(std::unique_ptr<TMXMap> const &map, rapidxml::xml_nod
 		// Create 2D vector to hold tile data
 		std::vector<std::vector<unsigned int>> tileVector(layerHeight, std::vector<unsigned int>(layerWidth));
 
-		int currentTile = 0;
+		int currentCol = 0;
 		int currentRow = 0;
 
 		// Loop whilst there are still tiles to be read and add them to the vector
@@ -280,17 +280,18 @@ void TMXLoader::loadLayers(std::unique_ptr<TMXMap> const &map, rapidxml::xml_nod
 
 		for (int i = 0; i < parsedCsvTileVector.size(); i++)
 		{
-			if (currentTile < layerWidth)
+			if (currentCol < layerWidth)
 			{
 				// Add tile to vector, must be cast from char* to unsigned int
-				tileVector[currentRow][currentTile] = (unsigned int)std::stoul(parsedCsvTileVector[i]);
-
-				currentTile++;
+				tileVector[currentCol][currentRow] = (unsigned int)std::stoul(parsedCsvTileVector[i]);
+				currentCol++;
 			}
 			else
 			{
-				currentTile = 0;
+				currentCol = 0;
 				currentRow++;
+				tileVector[currentCol][currentRow] = (unsigned int)std::stoul(parsedCsvTileVector[i]);
+				currentCol++;
 			}
 		}
 
