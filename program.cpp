@@ -201,6 +201,7 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
 
             auto layers = map1->getTileLayers();
 
+            //TODO: Stuttery motion - perhaps need to merge down to one layer in Tiled??
             for (unsigned int index = 0; index < layers->size(); ++index)
             {
                 tileID = layers->at(index).getTileVector()[i][j];
@@ -208,8 +209,8 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
                 // only render if it is an actual tile (tileID = 0 means no tile / don't render anything here)
                 if (tileID > 0)
                 {
-
-                    SDL_Rect srcrect = {16, 64, tileWidth, tileHeight};
+                    SDL_Rect srcrect = {((tileID - 1) % 32) * tileWidth, ((tileID - 1) / 32) * tileHeight, tileWidth, tileHeight};
+                    //SDL_Rect srcrect = {16, 64, tileWidth, tileHeight};
                     auto destX = i * tileWidth;
                     auto destY = j * tileHeight;
                     texture.render(destX, destY, &srcrect);

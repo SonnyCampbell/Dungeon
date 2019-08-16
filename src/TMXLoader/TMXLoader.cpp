@@ -299,7 +299,7 @@ void TMXLoader::loadLayers(std::unique_ptr<TMXMap> const &map, rapidxml::xml_nod
 		map->addLayer(TMXTileLayer(layerName, layerWidth, layerHeight, layerProperties, tileVector));
 
 		// Move to the next layer
-		currentNode = currentNode->parent()->parent()->next_sibling("layer");
+		currentNode = currentNode->parent()->next_sibling("layer");
 	}
 }
 
