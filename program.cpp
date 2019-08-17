@@ -9,6 +9,7 @@
 #include "src/AnimationKey.h"
 #include "src/Player.h"
 #include "src/TMXLoader/TMXLoader.h"
+#include "src/Collision.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
@@ -33,6 +34,7 @@ LTexture gBackgroundTexture(&gRenderer);
 const int WALKING_ANIMATION_FRAMES = 4;
 SDL_Rect gSpriteClips[WALKING_ANIMATION_FRAMES];
 LTexture gSpriteSheetTexture(&gRenderer);
+int frame = 0;
 
 //The surface contained by the window
 SDL_Surface *gScreenSurface = NULL;
@@ -193,45 +195,54 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
     int tileWidth = map1->getTileWidth();
     int tileHeight = map1->getTileHeight();
 
-    for (int i = 0; i < map1->getWidth(); ++i)
+    auto layers = map1->getTileLayers();
+
+    //TODO: Stuttery motion - perhaps need to merge down to one layer in Tiled??
+    for (unsigned int index = 0; index < layers->size(); ++index) // layers->size() = 5
     {
-        for (int j = 0; j < map1->getHeight(); ++j)
+        auto layer = layers->at(index);
+        for (int i = 0; i < map1->getWidth(); ++i)
         {
-            // get the tile at current position
-
-            auto layers = map1->getTileLayers();
-
-            //TODO: Stuttery motion - perhaps need to merge down to one layer in Tiled??
-            for (unsigned int index = 0; index < layers->size(); ++index)
+            for (int j = 0; j < map1->getHeight(); ++j)
             {
-                tileID = layers->at(index).getTileVector()[i][j];
+                tileID = layer.getTileVector()[i][j];
 
                 // only render if it is an actual tile (tileID = 0 means no tile / don't render anything here)
                 if (tileID > 0)
                 {
-                    SDL_Rect srcrect = {((tileID - 1) % 32) * tileWidth, ((tileID - 1) / 32) * tileHeight, tileWidth, tileHeight};
-                    //SDL_Rect srcrect = {16, 64, tileWidth, tileHeight};
+                    SDL_Rect srcrect = {((tileID - 1) % 32) * tileWidth, ((tileID - 1) / 32) * tileHeight, tileWidth, tileHeight}; // TODO Constant 32 = tiles wide/high (2 extra = layer around map?)
                     auto destX = i * tileWidth;
                     auto destY = j * tileHeight;
-                    texture.render(destX, destY, &srcrect);
-                    //SDL_RenderCopy(renderer, texture, &srcrect, &dstrect);
+                    texture.render(destX, destY, &srcrect); // Essentially this -> SDL_RenderCopyEx(*gRenderer, mTexture, clip, &renderQuad, angle, center, flip);
                 }
             }
         }
     }
 
-    //Render background texture to screen
-    //gBackgroundTexture.render(0, 0);
-
-    //Render Foo' to the screen
-    //gFooTexture.render(240, 190);
-
-    // SDL_Rect srcrect = {192, 36, 16, 28};
-    // auto destX = 100;
-    // auto destY = 50;
-    // gSpriteSheetTexture.render(destX, destY, &srcrect);
-
     player->Draw();
+
+    //Render current frame
+    SDL_Rect *currentClip = &gSpriteClips[frame / 6];
+    gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip);
+
+    //Go to next frame
+    ++frame;
+
+    //Cycle animation
+    if (frame / 6 >= WALKING_ANIMATION_FRAMES)
+    {
+        frame = 0;
+    }
+
+    //Update screen
+    SDL_RenderPresent(gRenderer);
+}
+
+void Update(double currentTick, float dt)
+{
+    player->Update(currentTick, dt);
+
+    Collision::Collision();
 }
 
 void HandleInput(SDL_Event &event, bool &quit)
@@ -274,8 +285,8 @@ int main(int argc, char *args[])
 
     bool quit = false;
     SDL_Event event;
-    //Current animation frame
-    int frame = 0;
+
+    int totalFrames = 0;
 
     //Flip type
     SDL_RendererFlip flipType = SDL_FLIP_NONE;
@@ -290,37 +301,13 @@ int main(int argc, char *args[])
         lastTick = currentTick;
 
         HandleInput(event, quit);
-        player->Update(currentTick, dt);
-
-        //Clear screen
-        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-        SDL_RenderClear(gRenderer);
+        Update(currentTick, dt);
 
         render(gRenderer, gSpriteSheetTexture, loader);
 
-        //Render background texture to screen
-        //gBackgroundTexture.render(0, 0);
-
-        //Render Foo' to the screen
-        //gFooTexture.render(240, 190);
-
-        //Render current frame
-        SDL_Rect *currentClip = &gSpriteClips[frame / 6];
-        gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip, NULL, NULL, flipType);
-
-        //Go to next frame
-        ++frame;
-
-        //Cycle animation
-        if (frame / 6 >= WALKING_ANIMATION_FRAMES)
-        {
-            frame = 0;
-        }
-
-        //player->Draw();
-
-        //Update screen
-        SDL_RenderPresent(gRenderer);
+        float seconds = (currentTick / 1000.f);
+        float fps = (float)totalFrames++ / seconds;
+        printf("FPS: %f - Seconds: %i\n", fps, (int)seconds);
     }
 
     close();
