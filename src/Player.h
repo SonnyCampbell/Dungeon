@@ -1,21 +1,19 @@
 #pragma once
 #include "AnimatedSprite.h"
 #include "Vec2.h"
+#include "RigidBody.h"
 
 class Player
 {
 private:
 public:
     AnimatedSprite *sprite;
+    RigidBody rb;
     Vec2 position;
-    float speed;
-    Vec2 *direction;
 
-    Player(SDL_Renderer **renderer, Vec2 _position, float _speed = 166.0f)
+    Player(SDL_Renderer **renderer, Vec2 _position, float speed = 166.0f) : rb(60.f, 16.f, 16.f, Vec2(50.f, 50.f), speed, Vec2(0, 0))
     {
         position = _position;
-        speed = _speed;
-        direction = new Vec2(0, 0);
 
         Vec2 frameSize = {16, 28};
         int runFps = 10;
@@ -35,7 +33,6 @@ public:
     ~Player()
     {
         delete sprite;
-        delete direction;
     }
 
     void Draw();
@@ -47,7 +44,7 @@ public:
 
 void Player::Update(double currentTick, float dt)
 {
-    Vec2 currentDirection = Vec2(direction->x(), direction->y());
+    Vec2 currentDirection = Vec2(rb.direction.x(), rb.direction.y());
 
     if (currentDirection.x() == 0 && currentDirection.y() == 0)
     {
@@ -59,7 +56,7 @@ void Player::Update(double currentTick, float dt)
     else
     {
         currentDirection.normalize();
-        position = position + (currentDirection * speed * dt);
+        position = position + (currentDirection * rb.speed * dt);
 
         if (sprite->currentAnimationKey != WalkUp)
         {
@@ -119,5 +116,5 @@ void Player::HandleInputEvent(const SDL_Event &event, float dt)
 
 void Player::UpdateDirection(Vec2 movementVector)
 {
-    *direction += movementVector;
+    rb.direction += movementVector;
 }
