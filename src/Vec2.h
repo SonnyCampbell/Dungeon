@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
+#include <algorithm>
 
 class Vec2
 {
@@ -44,9 +45,20 @@ public:
     static inline Vec2 max(const Vec2 &v1, const Vec2 &v2);
     static inline Vec2 zero() { return Vec2(0.f, 0.f); }
     static inline float dot_product(const Vec2 &v1, const Vec2 &v2);
+    static inline Vec2 clamp(const Vec2 &value, const Vec2 &min, const Vec2 &max);
 
     inline Vec2 major_axis();
 };
+
+float clip(float n, float lower, float upper)
+{
+    return std::max(lower, std::min(n, upper));
+}
+
+inline Vec2 Vec2::clamp(const Vec2 &value, const Vec2 &min, const Vec2 &max)
+{
+    return Vec2(clip(value.x(), min.x(), max.x()), clip(value.y(), min.y(), max.y()));
+}
 
 inline Vec2 Vec2::major_axis()
 {

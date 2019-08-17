@@ -41,6 +41,7 @@ public:
 
 struct CollisionResponse
 {
+    bool collision;
     Vec2 velocity;
     Contact contact;
 };
@@ -109,15 +110,15 @@ std::vector<BroadphaseTile> getBroadphaseTiles(TMXTileLayer &tileLayer, TMXTileS
     int maxX = (int)((max.x() + 0.5f) / tileset.getTileWidth());
     int maxY = (int)((max.y() + 0.5f) / tileset.getTileHeight());
 
-    std::vector<BroadphaseTile> tiles = std::vector<BroadphaseTile>((maxX - minX) * (maxY - minY));
+    std::vector<BroadphaseTile> tiles = std::vector<BroadphaseTile>();
 
-    for (int x = minX; x < maxX; x++)
+    for (int x = minX; x <= maxX; x++)
     {
-        if (x < 0 || x > tileLayer.getWidth())
+        if (x < 0 || x >= tileLayer.getWidth())
             continue;
-        for (int y = minY; y < maxY; y++)
+        for (int y = minY; y <= maxY; y++)
         {
-            if (y < 0 || y > tileLayer.getHeight())
+            if (y < 0 || y >= tileLayer.getHeight())
                 continue;
 
             auto tileAABB = tileToAABB(x, y, tileset);
@@ -167,7 +168,7 @@ CollisionResponse collisionResponse(float dt, Contact contact)
     // let solved = Speculative.speculativeSolver dt contact
 
     //     solved.a.velocity, contact
-    return CollisionResponse({solved.a.velocity(), contact});
+    return CollisionResponse({true, solved.a.velocity(), contact});
 }
 
 CollisionResponse innerCollide(TMXTileLayer &tileLayer, RigidBody moveableObject, AABB &tileAABB, int tileType, float dt, int x, int y)
@@ -209,6 +210,9 @@ std::vector<CollisionResponse> collision(TMXTileLayer &tileLayer, TMXTileSet &ti
     for (int i = 0; i < tiles.size(); i++)
     {
         auto tile = tiles[i];
+        if (tile.tileId == 0)
+            continue;
+
         collisionResponses.push_back(innerCollide(tileLayer, rb, tile.tileAABB, tile.tileId, dt, tile.x, tile.y));
     }
 

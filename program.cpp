@@ -244,23 +244,41 @@ void Update(double currentTick, float dt)
     auto collision_layer = map1->getTileLayers()->at(2);
     auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player->rb, dt);
 
-    Vec2 after_collision_velocity;
-    if (collisions.size() == 0)
+    if (collisions.size() > 0)
     {
-        after_collision_velocity = player->rb.velocity();
-    }
-    else
-    {
-        std::sort(collisions.begin(), collisions.end(), [](CollisionResponse cr1, CollisionResponse cr2) {
-            return cr1.contact.distance > cr1.contact.distance;
-        });
-
         auto collision = collisions[0];
-        after_collision_velocity = collision.velocity;
+        Vec2 after_collision_velocity;
+        if (collision.collision == false)
+        {
+            after_collision_velocity = player->rb.velocity();
+        }
+        else
+        {
+            std::sort(collisions.begin(), collisions.end(), [](CollisionResponse cr1, CollisionResponse cr2) {
+                return cr1.contact.distance < cr1.contact.distance;
+            });
+
+            after_collision_velocity = collision.velocity;
+        }
+
+        printf("Vel: x %f y %f \n", after_collision_velocity.x(), after_collision_velocity.y());
+        auto max_clamp = Vec2((map1->getWidth() * map1->getTileWidth() - player->rb.aabb.halfExtents.x()),
+                              (map1->getHeight() * map1->getTileHeight() - player->rb.aabb.halfExtents.y()));
+
+        auto new_position = player->rb.aabb.center + (after_collision_velocity * dt);
+        new_position = Vec2::clamp(new_position, player->rb.aabb.halfExtents, max_clamp);
+
+        //player->rb.direction = after_collision_velocity.normalized_vector();
+        //wplayer->rb.speed = after_collision_velocity.length();
+        // Vec2 currentDirection = Vec2(player->rb.direction.x(), player->rb.direction.y());
+        // currentDirection.normalize();
+        player->rb.aabb.center = new_position;
+        return;
     }
 
-    player->rb.direction = after_collision_velocity.normalized_vector();
-    player->rb.speed = after_collision_velocity.length();
+    Vec2 currentDirection = Vec2(player->rb.direction.x(), player->rb.direction.y());
+    currentDirection.normalize();
+    player->rb.aabb.center = player->rb.aabb.center + (currentDirection * player->rb.speed * dt);
 }
 
 void HandleInput(SDL_Event &event, bool &quit)
@@ -325,7 +343,7 @@ int main(int argc, char *args[])
 
         float seconds = (currentTick / 1000.f);
         float fps = (float)totalFrames++ / seconds;
-        printf("FPS: %f - Seconds: %i\n", fps, (int)seconds);
+        //printf("FPS: %f - Seconds: %i\n", fps, (int)seconds);
     }
 
     close();

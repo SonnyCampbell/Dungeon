@@ -52,9 +52,6 @@ void Player::Update(double currentTick, float dt)
     }
     else
     {
-        currentDirection.normalize();
-        rb.aabb.center = rb.aabb.center + (currentDirection * rb.speed * dt);
-
         if (sprite->currentAnimationKey != WalkUp)
         {
             sprite->ResetAnimation(WalkUp);
