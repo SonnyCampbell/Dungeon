@@ -9,12 +9,9 @@ private:
 public:
     AnimatedSprite *sprite;
     RigidBody rb;
-    Vec2 position;
 
-    Player(SDL_Renderer **renderer, Vec2 _position, float speed = 166.0f) : rb(60.f, 16.f, 16.f, Vec2(50.f, 50.f), speed, Vec2(0, 0))
+    Player(SDL_Renderer **renderer, Vec2 position, float speed = 166.0f) : rb(60.f, 16.f, 16.f, position, speed, Vec2(0, 0))
     {
-        position = _position;
-
         Vec2 frameSize = {16, 28};
         int runFps = 10;
         int idleFps = 5;
@@ -56,7 +53,7 @@ void Player::Update(double currentTick, float dt)
     else
     {
         currentDirection.normalize();
-        position = position + (currentDirection * rb.speed * dt);
+        rb.aabb.center = rb.aabb.center + (currentDirection * rb.speed * dt);
 
         if (sprite->currentAnimationKey != WalkUp)
         {
@@ -69,7 +66,7 @@ void Player::Update(double currentTick, float dt)
 
 void Player::Draw()
 {
-    sprite->Draw(position);
+    sprite->Draw(rb.aabb.center);
 }
 
 void Player::HandleInputEvent(const SDL_Event &event, float dt)
