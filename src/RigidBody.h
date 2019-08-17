@@ -7,7 +7,11 @@ public:
     Vec2 halfExtents;
     Vec2 center;
 
-    AABB(Vec2 _halfExtents, Vec2 _center)
+    AABB()
+    {
+    }
+
+    AABB(Vec2 _center, Vec2 _halfExtents)
     {
         halfExtents = _halfExtents;
         center = _center;
@@ -43,7 +47,11 @@ public:
     float speed;
     Vec2 direction;
 
-    RigidBody(float _mass, float width, float height, Vec2 center, float _speed, Vec2 _direction) : aabb(Vec2(width / 2.f, height / 2.f), center)
+    RigidBody()
+    {
+    }
+
+    RigidBody(float _mass, float width, float height, Vec2 center, float _speed, Vec2 _direction) : aabb(center, Vec2(width / 2.f, height / 2.f))
     {
         mass = _mass;
         inverseMass = mass != 0 ? 1.f / mass : 0;
@@ -52,5 +60,10 @@ public:
     }
     ~RigidBody()
     {
+    }
+
+    Vec2 velocity()
+    {
+        return direction * speed;
     }
 };

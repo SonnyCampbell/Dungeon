@@ -38,8 +38,46 @@ public:
     }
 
     inline void make_unit_vector();
+    inline Vec2 Vec2::normalized_vector();
     inline void normalize();
+    static inline Vec2 min(const Vec2 &v1, const Vec2 &v2);
+    static inline Vec2 max(const Vec2 &v1, const Vec2 &v2);
+    static inline Vec2 zero() { return Vec2(0.f, 0.f); }
+    static inline float dot_product(const Vec2 &v1, const Vec2 &v2);
+
+    inline Vec2 major_axis();
 };
+
+inline Vec2 Vec2::major_axis()
+{
+    auto this_x = this->x();
+    auto this_y = this->y();
+    auto abs_this_x = abs(this_x);
+    auto abs_this_y = abs(this_y);
+    if (abs_this_x > abs_this_y)
+    {
+        return Vec2(this_x / abs_this_x, 0.f);
+    }
+    else
+    {
+        return Vec2(0.f, this_y / abs_this_y);
+    }
+}
+
+inline float Vec2::dot_product(const Vec2 &v1, const Vec2 &v2)
+{
+    return (v1.x() * v2.x()) + (v1.y() * v2.y());
+}
+
+inline Vec2 Vec2::min(const Vec2 &v1, const Vec2 &v2)
+{
+    return Vec2((double)v1.x() < (double)v2.x() ? v1.x() : v2.x(), (double)v1.y() < (double)v2.y() ? v1.y() : v2.y());
+}
+
+inline Vec2 Vec2::max(const Vec2 &v1, const Vec2 &v2)
+{
+    return Vec2((double)v1.x() > (double)v2.x() ? v1.x() : v2.x(), (double)v1.y() > (double)v2.y() ? v1.y() : v2.y());
+}
 
 inline std::istream &operator>>(std::istream &is, Vec2 &t)
 {
@@ -58,6 +96,17 @@ inline void Vec2::make_unit_vector()
     float k = 1.0 / sqrt(e[0] * e[0] + e[1] * e[1]);
     e[0] = k;
     e[1] = k;
+}
+
+inline Vec2 Vec2::normalized_vector()
+{
+    if (e[0] == 0 && e[1] == 0)
+    {
+        return Vec2::zero();
+    }
+    float k = 1.0 / sqrt(e[0] * e[0] + e[1] * e[1]);
+
+    return Vec2(e[0] * k, e[1] * k);
 }
 
 inline void Vec2::normalize()

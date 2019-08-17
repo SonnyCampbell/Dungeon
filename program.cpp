@@ -25,6 +25,7 @@ SDL_Window *gWindow = NULL;
 SDL_Renderer *gRenderer = NULL;
 
 auto loader = new TMXLoader();
+TMXMap *map1 = NULL;
 
 //Scene textures
 LTexture gFooTexture(&gRenderer);
@@ -111,6 +112,7 @@ bool loadMedia()
     bool success = true;
 
     loader->loadMap("Map1", "assets/Map1.tmx");
+    map1 = loader->getMap("Map1");
 
     //Load Foo' texture
     if (!gFooTexture.loadFromFile("assets/foo.png"))
@@ -190,8 +192,6 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
 
     unsigned int tileID = 0;
 
-    TMXMap *map1 = loader->getMap("Map1");
-
     int tileWidth = map1->getTileWidth();
     int tileHeight = map1->getTileHeight();
 
@@ -241,8 +241,26 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
 void Update(double currentTick, float dt)
 {
     player->Update(currentTick, dt);
+    auto collision_layer = map1->getTileLayers()->at(2);
+    auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player->rb, dt);
 
-    Collision::Collision();
+    Vec2 after_collision_velocity;
+    if (collisions.size() == 0)
+    {
+        after_collision_velocity = player->rb.velocity();
+    }
+    else
+    {
+        std::sort(collisions.begin(), collisions.end(), [](CollisionResponse cr1, CollisionResponse cr2) {
+            return cr1.contact.distance > cr1.contact.distance;
+        });
+
+        auto collision = collisions[0];
+        after_collision_velocity = collision.velocity;
+    }
+
+    player->rb.direction = after_collision_velocity.normalized_vector();
+    player->rb.speed = after_collision_velocity.length();
 }
 
 void HandleInput(SDL_Event &event, bool &quit)
@@ -291,7 +309,7 @@ int main(int argc, char *args[])
     //Flip type
     SDL_RendererFlip flipType = SDL_FLIP_NONE;
 
-    player = new Player(&gRenderer, {50, 50});
+    player = new Player(&gRenderer, {100, 100});
 
     // TODO: Need gametime for animation frames
     while (!quit)

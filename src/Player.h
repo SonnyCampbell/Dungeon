@@ -10,9 +10,9 @@ public:
     AnimatedSprite *sprite;
     RigidBody rb;
 
-    Player(SDL_Renderer **renderer, Vec2 position, float speed = 166.0f) : rb(60.f, 16.f, 16.f, position, speed, Vec2(0, 0))
+    Player(SDL_Renderer **renderer, Vec2 position, float speed = 166.0f) : rb(60.f, 16.f, 28.f, position, speed, Vec2(0, 0))
     {
-        Vec2 frameSize = {16, 28};
+        Vec2 frameSize = {16, 28}; //TODO Constants - Spritesheet frame width/height ---- ^ also
         int runFps = 10;
         int idleFps = 5;
         std::map<AnimationKey, Animation *> *animations = new std::map<AnimationKey, Animation *>({{IdleUp, new Animation(4, idleFps, frameSize, {128, 36})},
