@@ -197,7 +197,6 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
 
     auto layers = map1->getTileLayers();
 
-    //TODO: Stuttery motion - perhaps need to merge down to one layer in Tiled??
     for (unsigned int index = 0; index < layers->size(); ++index) // layers->size() = 5
     {
         auto layer = layers->at(index);
@@ -213,66 +212,102 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
                     SDL_Rect srcrect = {((tileID - 1) % 32) * tileWidth, ((tileID - 1) / 32) * tileHeight, tileWidth, tileHeight}; // TODO Constant 32 = tiles wide/high (2 extra = layer around map?)
                     auto destX = i * tileWidth;
                     auto destY = j * tileHeight;
-                    texture.render(destX, destY, &srcrect); // Essentially this -> SDL_RenderCopyEx(*gRenderer, mTexture, clip, &renderQuad, angle, center, flip);
+                    texture.render(destX, destY, &srcrect);
+
+                    //DEBUG DRAWING
+                    // if (index == 2)
+                    // {
+                    //     SDL_Rect x = {destX, destY, tileWidth, tileHeight};
+                    //     SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+                    //     SDL_RenderDrawRect(gRenderer, &x);
+                    // }
                 }
             }
         }
     }
 
     player->Draw();
+    //DEBUG DRAWING
+    SDL_Rect t = {player->rb.aabb.min().x(), player->rb.aabb.min().y(), player->sprite->CurrentAnimation()->CurrentFrame().w, player->sprite->CurrentAnimation()->CurrentFrame().h};
+    SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+    SDL_RenderDrawRect(gRenderer, &t);
+    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
+    SDL_RenderDrawPointF(gRenderer, player->rb.aabb.center.x(), player->rb.aabb.center.y());
 
     //Render current frame
     SDL_Rect *currentClip = &gSpriteClips[frame / 6];
     gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip);
-
     //Go to next frame
     ++frame;
-
     //Cycle animation
     if (frame / 6 >= WALKING_ANIMATION_FRAMES)
     {
         frame = 0;
     }
-
-    //Update screen
-    SDL_RenderPresent(gRenderer);
 }
 
 void Update(double currentTick, float dt)
 {
     player->Update(currentTick, dt);
     auto collision_layer = map1->getTileLayers()->at(2);
-    auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player->rb, dt);
+    auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player->rb, dt, gRenderer);
 
     if (collisions.size() > 0)
     {
-        auto collision = collisions[0];
-        Vec2 after_collision_velocity;
-        if (collision.collision == false)
+        auto collision_vector = Vec2();
+
+        for (int i = 0; i < collisions.size(); i++)
         {
-            after_collision_velocity = player->rb.velocity();
+            auto collision_normal = collisions[i].contact.normal;
+            if ((collision_normal.x() > 0.f && player->rb.direction.x() < 0.f) || (collision_normal.x() < 0.f && player->rb.direction.x() > 0.f))
+            {
+                collision_vector = Vec2(1.f, collision_vector.y());
+                //player->rb.direction = Vec2(0.f, player->rb.direction.y());
+            }
+            if ((collision_normal.y() > 0.f && player->rb.direction.y() < 0.f) || (collision_normal.y() < 0.f && player->rb.direction.y() > 0.f))
+            {
+                collision_vector = Vec2(collision_vector.x(), 1.f);
+                //player->rb.direction = Vec2(player->rb.direction.x(), 0.f);
+            }
         }
-        else
-        {
-            std::sort(collisions.begin(), collisions.end(), [](CollisionResponse cr1, CollisionResponse cr2) {
-                return cr1.contact.distance < cr1.contact.distance;
-            });
 
-            after_collision_velocity = collision.velocity;
-        }
+        Vec2 currentDirection = Vec2(player->rb.direction.x(), player->rb.direction.y());
+        currentDirection.normalize();
+        auto thing = Vec2(currentDirection.x() - (currentDirection.x() * collision_vector.x()), currentDirection.y() - (currentDirection.y() * collision_vector.y()));
+        player->rb.aabb.center = player->rb.aabb.center + (thing * player->rb.speed * dt);
 
-        printf("Vel: x %f y %f \n", after_collision_velocity.x(), after_collision_velocity.y());
-        auto max_clamp = Vec2((map1->getWidth() * map1->getTileWidth() - player->rb.aabb.halfExtents.x()),
-                              (map1->getHeight() * map1->getTileHeight() - player->rb.aabb.halfExtents.y()));
+        // std::sort(collisions.begin(), collisions.end(), [](CollisionResponse cr1, CollisionResponse cr2) {
+        //     return cr1.contact.distance < cr1.contact.distance;
+        // });
 
-        auto new_position = player->rb.aabb.center + (after_collision_velocity * dt);
-        new_position = Vec2::clamp(new_position, player->rb.aabb.halfExtents, max_clamp);
+        // auto collision = collisions[0];
+        // printf("ACV: %f %f\n", collision.contact.normal.x(), collision.contact.normal.y());
+
+        // Vec2 after_collision_velocity;
+        // if (collision.collision == false)
+        // {
+        //     after_collision_velocity = player->rb.velocity();
+        // }
+        // else
+        // {
+
+        //     after_collision_velocity = collision.velocity;
+        //     // if (after_collision_velocity.length() > 0.f)
+        //     //     printf("ACV: %f %f\n", after_collision_velocity.x(), after_collision_velocity.y());
+        // }
+
+        // auto max_clamp = Vec2((map1->getWidth() * map1->getTileWidth() - player->rb.aabb.halfExtents.x()),
+        //                       (map1->getHeight() * map1->getTileHeight() - player->rb.aabb.halfExtents.y()));
+
+        // auto new_position = player->rb.aabb.center + (after_collision_velocity * dt);
+        // new_position = Vec2::clamp(new_position, player->rb.aabb.halfExtents, max_clamp);
 
         //player->rb.direction = after_collision_velocity.normalized_vector();
-        //wplayer->rb.speed = after_collision_velocity.length();
+        //player->rb.speed = after_collision_velocity.length();
         // Vec2 currentDirection = Vec2(player->rb.direction.x(), player->rb.direction.y());
         // currentDirection.normalize();
-        player->rb.aabb.center = new_position;
+        //player->rb.aabb.center = new_position;
+
         return;
     }
 
@@ -337,9 +372,12 @@ int main(int argc, char *args[])
         lastTick = currentTick;
 
         HandleInput(event, quit);
-        Update(currentTick, dt);
 
         render(gRenderer, gSpriteSheetTexture, loader);
+        Update(currentTick, dt);
+
+        //Update screen
+        SDL_RenderPresent(gRenderer);
 
         float seconds = (currentTick / 1000.f);
         float fps = (float)totalFrames++ / seconds;

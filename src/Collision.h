@@ -171,15 +171,29 @@ CollisionResponse collisionResponse(float dt, Contact contact)
     return CollisionResponse({true, solved.a.velocity(), contact});
 }
 
-CollisionResponse innerCollide(TMXTileLayer &tileLayer, RigidBody moveableObject, AABB &tileAABB, int tileType, float dt, int x, int y)
+CollisionResponse innerCollide(TMXTileLayer &tileLayer, RigidBody moveableObject, AABB &tileAABB, int tileType, float dt, int x, int y, SDL_Renderer *renderer)
 {
     auto tileRb = RigidBody(0.f, tileAABB.size().x(), tileAABB.size().y(), tileAABB.center, 0.f, Vec2::zero());
     auto collision_contact = AABBvAABB(moveableObject, tileRb, x, y, tileLayer);
 
+    auto tileWidth = tileAABB.size().x();
+    auto tileHeight = tileAABB.size().y();
+
+    SDL_FRect srcrect = {((tileType - 1) % 32) * tileWidth, ((tileType - 1) / 32) * tileHeight, tileWidth, tileHeight}; // TODO Constant 32 = tiles wide/high (2 extra = layer around map?)
+    auto destX = x * tileWidth;
+    auto destY = y * tileHeight;
+    SDL_FRect debugRect = {destX, destY, tileWidth, tileHeight};
+
     if (collision_contact.first)
     {
+        SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
+        SDL_RenderDrawRectF(renderer, &debugRect);
+
         return collisionResponse(dt, collision_contact.second);
     }
+
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
+    SDL_RenderDrawRectF(renderer, &debugRect);
 
     return CollisionResponse();
     // let tileRigidBody = RigidBody.create(0.f, tileAabb.size.X, tileAabb.size.Y, tileAabb.center, Vector2.Zero)
@@ -191,9 +205,9 @@ CollisionResponse innerCollide(TMXTileLayer &tileLayer, RigidBody moveableObject
     //         else None
 }
 
-std::vector<CollisionResponse> collision(TMXTileLayer &tileLayer, TMXTileSet &tileset, RigidBody rb, float dt)
+std::vector<CollisionResponse> collision(TMXTileLayer &tileLayer, TMXTileSet &tileset, RigidBody rb, float dt, SDL_Renderer *renderer)
 {
-    auto expand = Vec2(5.f, 5.f);
+    auto expand = Vec2(0.f, 0.f);
     auto predictedPos = rb.aabb.center + (rb.velocity() * dt);
 
     // find min/max
@@ -213,7 +227,11 @@ std::vector<CollisionResponse> collision(TMXTileLayer &tileLayer, TMXTileSet &ti
         if (tile.tileId == 0)
             continue;
 
-        collisionResponses.push_back(innerCollide(tileLayer, rb, tile.tileAABB, tile.tileId, dt, tile.x, tile.y));
+        auto collision = innerCollide(tileLayer, rb, tile.tileAABB, tile.tileId, dt, tile.x, tile.y, renderer);
+        if (collision.collision)
+        {
+            collisionResponses.push_back(collision);
+        }
     }
 
     return collisionResponses;

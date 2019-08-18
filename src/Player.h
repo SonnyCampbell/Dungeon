@@ -63,7 +63,7 @@ void Player::Update(double currentTick, float dt)
 
 void Player::Draw()
 {
-    sprite->Draw(rb.aabb.center);
+    sprite->Draw(rb.aabb.min());
 }
 
 void Player::HandleInputEvent(const SDL_Event &event, float dt)

@@ -94,7 +94,7 @@ void TMXTileLayer::printData()
 
 unsigned int TMXTileLayer::getTileId(int x, int y)
 {
-    if (x < 0 || x > this->getWidth() || y < 0 || y > this->getHeight())
+    if (x < 0 || x >= this->getWidth() || y < 0 || y >= this->getHeight())
         return 0;
 
     return this->getTileVector()[x][y];
