@@ -27,15 +27,7 @@ SDL_Renderer *gRenderer = NULL;
 auto loader = new TMXLoader();
 TMXMap *map1 = NULL;
 
-//Scene textures
-LTexture gFooTexture(&gRenderer);
-LTexture gBackgroundTexture(&gRenderer);
-
-//Walking animation
-const int WALKING_ANIMATION_FRAMES = 4;
-SDL_Rect gSpriteClips[WALKING_ANIMATION_FRAMES];
 LTexture gSpriteSheetTexture(&gRenderer);
-int frame = 0;
 
 //The surface contained by the window
 SDL_Surface *gScreenSurface = NULL;
@@ -114,54 +106,11 @@ bool loadMedia()
     loader->loadMap("Map1", "assets/Map1.tmx");
     map1 = loader->getMap("Map1");
 
-    //Load Foo' texture
-    if (!gFooTexture.loadFromFile("assets/foo.png"))
-    {
-        printf("Failed to load Foo' texture image!\n");
-        success = false;
-    }
-
-    //Load background texture
-    if (!gBackgroundTexture.loadFromFile("assets/background.png"))
-    {
-        printf("Failed to load background texture image!\n");
-        success = false;
-    }
-
     //Load sprite sheet texture
     if (!gSpriteSheetTexture.loadFromFile("assets/DungeonTilesetV2.png"))
     {
         printf("Failed to load sprite sheet texture!\n");
         success = false;
-    }
-    else
-    {
-        int width = 16;
-        int height = 28;
-
-        //Set top left sprite
-        gSpriteClips[0].x = 192;
-        gSpriteClips[0].y = 36;
-        gSpriteClips[0].w = width;
-        gSpriteClips[0].h = height;
-
-        //Set top right sprite
-        gSpriteClips[1].x = 208;
-        gSpriteClips[1].y = 36;
-        gSpriteClips[1].w = width;
-        gSpriteClips[1].h = height;
-
-        //Set bottom left sprite
-        gSpriteClips[2].x = 224;
-        gSpriteClips[2].y = 36;
-        gSpriteClips[2].w = width;
-        gSpriteClips[2].h = height;
-
-        //Set bottom right sprite
-        gSpriteClips[3].x = 240;
-        gSpriteClips[3].y = 36;
-        gSpriteClips[3].w = width;
-        gSpriteClips[3].h = height;
     }
 
     return success;
@@ -169,10 +118,6 @@ bool loadMedia()
 
 void close()
 {
-    //Free loaded images
-    gFooTexture.free();
-    gBackgroundTexture.free();
-
     //Destroy window
     SDL_DestroyRenderer(gRenderer);
     SDL_DestroyWindow(gWindow);
@@ -206,7 +151,7 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
             {
                 tileID = layer.getTileVector()[i][j];
 
-                // only render if it is an actual tile (tileID = 0 means no tile / don't render anything here)
+                // only render if it is an actual tile (tileID = 0 means no tile / don't render anycollision_corrected_direction here)
                 if (tileID > 0)
                 {
                     SDL_Rect srcrect = {((tileID - 1) % 32) * tileWidth, ((tileID - 1) / 32) * tileHeight, tileWidth, tileHeight}; // TODO Constant 32 = tiles wide/high (2 extra = layer around map?)
@@ -227,23 +172,6 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
     }
 
     player->Draw();
-    //DEBUG DRAWING
-    SDL_Rect t = {player->rb.aabb.min().x(), player->rb.aabb.min().y(), player->sprite->CurrentAnimation()->CurrentFrame().w, player->sprite->CurrentAnimation()->CurrentFrame().h};
-    SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-    SDL_RenderDrawRect(gRenderer, &t);
-    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-    SDL_RenderDrawPointF(gRenderer, player->rb.aabb.center.x(), player->rb.aabb.center.y());
-
-    //Render current frame
-    SDL_Rect *currentClip = &gSpriteClips[frame / 6];
-    gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip);
-    //Go to next frame
-    ++frame;
-    //Cycle animation
-    if (frame / 6 >= WALKING_ANIMATION_FRAMES)
-    {
-        frame = 0;
-    }
 }
 
 void Update(double currentTick, float dt)
@@ -273,8 +201,8 @@ void Update(double currentTick, float dt)
 
         Vec2 currentDirection = Vec2(player->rb.direction.x(), player->rb.direction.y());
         currentDirection.normalize();
-        auto thing = Vec2(currentDirection.x() - (currentDirection.x() * collision_vector.x()), currentDirection.y() - (currentDirection.y() * collision_vector.y()));
-        player->rb.aabb.center = player->rb.aabb.center + (thing * player->rb.speed * dt);
+        auto collision_corrected_direction = Vec2(currentDirection.x() - (currentDirection.x() * collision_vector.x()), currentDirection.y() - (currentDirection.y() * collision_vector.y()));
+        player->rb.aabb.center = player->rb.aabb.center + (collision_corrected_direction * player->rb.speed * dt);
 
         // std::sort(collisions.begin(), collisions.end(), [](CollisionResponse cr1, CollisionResponse cr2) {
         //     return cr1.contact.distance < cr1.contact.distance;
@@ -354,17 +282,11 @@ int main(int argc, char *args[])
         return 0;
     }
 
-    bool quit = false;
-    SDL_Event event;
-
-    int totalFrames = 0;
-
-    //Flip type
-    SDL_RendererFlip flipType = SDL_FLIP_NONE;
-
     player = new Player(&gRenderer, {100, 100});
 
-    // TODO: Need gametime for animation frames
+    int totalFrames = 0;
+    bool quit = false;
+    SDL_Event event;
     while (!quit)
     {
         currentTick = SDL_GetTicks();
@@ -381,7 +303,6 @@ int main(int argc, char *args[])
 
         float seconds = (currentTick / 1000.f);
         float fps = (float)totalFrames++ / seconds;
-        //printf("FPS: %f - Seconds: %i\n", fps, (int)seconds);
     }
 
     close();

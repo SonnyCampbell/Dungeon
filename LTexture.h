@@ -8,6 +8,9 @@
 class LTexture
 {
 public:
+    // The Global Renderer
+    SDL_Renderer **gRenderer;
+
     //Initializes variables
     LTexture(SDL_Renderer **renderer)
     {
@@ -69,9 +72,6 @@ public:
     void setAlpha(Uint8 alpha);
 
 private:
-    // The Global Renderer
-    SDL_Renderer **gRenderer;
-
     //The actual hardware texture
     SDL_Texture *mTexture;
 
