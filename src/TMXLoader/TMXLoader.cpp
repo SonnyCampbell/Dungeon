@@ -268,7 +268,7 @@ void TMXLoader::loadLayers(std::unique_ptr<TMXMap> const &map, rapidxml::xml_nod
 		//currentNode = currentNode->first_node("tile");
 
 		// Create 2D vector to hold tile data
-		std::vector<std::vector<unsigned int>> tileVector(layerHeight, std::vector<unsigned int>(layerWidth));
+		std::vector<std::vector<TMXTile *>> tileVector(layerHeight, std::vector<TMXTile *>(layerWidth));
 
 		int currentCol = 0;
 		int currentRow = 0;
@@ -283,14 +283,14 @@ void TMXLoader::loadLayers(std::unique_ptr<TMXMap> const &map, rapidxml::xml_nod
 			if (currentCol < layerWidth)
 			{
 				// Add tile to vector, must be cast from char* to unsigned int
-				tileVector[currentCol][currentRow] = (unsigned int)std::stoul(parsedCsvTileVector[i]);
+				tileVector[currentCol][currentRow] = new TMXTile((unsigned int)std::stoul(parsedCsvTileVector[i]), std::unordered_map<std::string, std::string>());
 				currentCol++;
 			}
 			else
 			{
 				currentCol = 0;
 				currentRow++;
-				tileVector[currentCol][currentRow] = (unsigned int)std::stoul(parsedCsvTileVector[i]);
+				tileVector[currentCol][currentRow] = new TMXTile((unsigned int)std::stoul(parsedCsvTileVector[i]), std::unordered_map<std::string, std::string>());
 				currentCol++;
 			}
 		}

@@ -22,29 +22,32 @@
 #include <unordered_map>
 #include <string>
 #include <iostream>
+#include <SDL.h>
 
 class TMXTile
 {
     /* Class constructors & destructors */
 public:
-	TMXTile(unsigned int tileID, std::unordered_map<std::string, std::string>& propertiesMap);
-	~TMXTile();
+    TMXTile();
+    TMXTile(unsigned int tileID, std::unordered_map<std::string, std::string> &propertiesMap);
+    ~TMXTile();
 
     /* Getter functions */
 public:
     unsigned int getTileID();
     std::string getProperty(std::string propertyName);
-    
+
     /* Debug functions */
 public:
-	void printData();
+    void printData();
+    SDL_Rect getCollisionBoundary();
 
     /* Tile variables */
 private:
-	unsigned int m_tileID;
-    
+    unsigned int m_tileID;
+    SDL_Rect collision_rect;
+
     /* User-defined properties */
 private:
-	std::unordered_map<std::string, std::string> m_propertiesMap;
+    std::unordered_map<std::string, std::string> m_propertiesMap;
 };
-

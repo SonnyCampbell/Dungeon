@@ -19,14 +19,14 @@
 
 #include "TMXTileLayer.h"
 
-TMXTileLayer::TMXTileLayer(std::string name, unsigned int width, unsigned int height, std::unordered_map<std::string, std::string> layerProperties, std::vector<std::vector<unsigned int>> tileVector) : m_name(name), m_width(width), m_height(height), m_layerProperties(layerProperties), m_tileVector(tileVector)
+TMXTileLayer::TMXTileLayer(std::string name, unsigned int width, unsigned int height, std::unordered_map<std::string, std::string> layerProperties, std::vector<std::vector<TMXTile *>> tileVector) : m_name(name), m_width(width), m_height(height), m_layerProperties(layerProperties), m_tileVector(tileVector)
 {
 }
 
 TMXTileLayer::~TMXTileLayer()
 {
     m_tileVector.clear();
-    std::vector<std::vector<unsigned int>>().swap(m_tileVector);
+    std::vector<std::vector<TMXTile *>>().swap(m_tileVector);
 
     m_layerProperties.clear();
     std::unordered_map<std::string, std::string>().swap(m_layerProperties);
@@ -47,7 +47,7 @@ unsigned int TMXTileLayer::getHeight()
     return m_height;
 }
 
-std::vector<std::vector<unsigned int>> TMXTileLayer::getTileVector()
+std::vector<std::vector<TMXTile *>> TMXTileLayer::getTileVector()
 {
     return m_tileVector;
 }
@@ -86,7 +86,7 @@ void TMXTileLayer::printData()
     {
         for (unsigned int column = 0; column < m_height; ++column)
         {
-            std::cout << m_tileVector[row][column] << " ";
+            std::cout << m_tileVector[row][column]->getTileID() << " ";
         }
         std::cout << std::endl;
     }
@@ -97,5 +97,5 @@ unsigned int TMXTileLayer::getTileId(int x, int y)
     if (x < 0 || x >= this->getWidth() || y < 0 || y >= this->getHeight())
         return 0;
 
-    return this->getTileVector()[x][y];
+    return m_tileVector[x][y]->getTileID();
 }

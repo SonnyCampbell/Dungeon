@@ -149,7 +149,7 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
         {
             for (int j = 0; j < map1->getHeight(); ++j)
             {
-                tileID = layer.getTileVector()[i][j];
+                tileID = layer.getTileVector()[i][j]->getTileID();
 
                 // only render if it is an actual tile (tileID = 0 means no tile / don't render anycollision_corrected_direction here)
                 if (tileID > 0)

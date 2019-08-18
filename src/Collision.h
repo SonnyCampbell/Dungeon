@@ -122,7 +122,7 @@ std::vector<BroadphaseTile> getBroadphaseTiles(TMXTileLayer &tileLayer, TMXTileS
                 continue;
 
             auto tileAABB = tileToAABB(x, y, tileset);
-            auto tileId = tileLayer.getTileVector()[x][y];
+            auto tileId = tileLayer.getTileVector()[x][y]->getTileID();
 
             tiles.push_back({tileId, tileAABB, x, y});
         }
@@ -189,6 +189,7 @@ CollisionResponse innerCollide(TMXTileLayer &tileLayer, RigidBody moveableObject
         SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
         SDL_RenderDrawRectF(renderer, &debugRect);
 
+        
         return collisionResponse(dt, collision_contact.second);
     }
 

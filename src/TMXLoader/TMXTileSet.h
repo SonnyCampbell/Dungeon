@@ -31,10 +31,10 @@ class TMXTileSet
 {
 	/* Class constructors & destructors */
 public:
-	TMXTileSet(std::unordered_map<std::string, std::string>& tileSetData, std::unordered_map<std::string, std::string>& propertiesMap, std::vector<TMXTile>& tileVector);
+	TMXTileSet(std::unordered_map<std::string, std::string> &tileSetData, std::unordered_map<std::string, std::string> &propertiesMap, std::vector<TMXTile> &tileVector);
 	~TMXTileSet();
 
-    /* Getter functions */
+	/* Getter functions */
 public:
 	std::string getName();
 	std::string getSource();
@@ -48,12 +48,12 @@ public:
 	unsigned int getMargin();
 	unsigned int getOffsetX();
 	unsigned int getOffsetY();
-    std::array<unsigned int, 3> getTransparentColourArray();
-    unsigned int getTileCount();
-    std::string getProperty(std::string propertyName);
-    TMXTile* getTile(unsigned int tileID);
+	std::array<unsigned int, 3> getTransparentColourArray();
+	unsigned int getTileCount();
+	std::string getProperty(std::string propertyName);
+	TMXTile *getTile(unsigned int tileID);
 
-    /* Debug functions */
+	/* Debug functions */
 public:
 	void printData();
 
@@ -71,11 +71,11 @@ private:
 	unsigned int m_margin;
 	unsigned int m_offsetX;
 	unsigned int m_offsetY;
-    std::array<unsigned int, 3> m_transparentColourArray;
-    unsigned int m_tileCount;
+	std::array<unsigned int, 3> m_transparentColourArray;
+	unsigned int m_tileCount;
 	std::vector<TMXTile> m_tileVector;
-    
-    /* User-defined properties */
+
+	/* User-defined properties */
 private:
-    std::unordered_map<std::string, std::string> m_propertiesMap;
+	std::unordered_map<std::string, std::string> m_propertiesMap;
 };
