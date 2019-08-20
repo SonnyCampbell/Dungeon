@@ -27,7 +27,7 @@ TMXTile::TMXTile(unsigned int tileID, std::unordered_map<std::string, std::strin
 {
     if (tileID == 34)
     {
-        collision_rect = {0, 0, 5, 16};
+        collision_rect = {0, 0, 16, 5};
     }
 }
 
