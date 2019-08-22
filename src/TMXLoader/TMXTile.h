@@ -41,11 +41,13 @@ public:
 public:
     void printData();
     SDL_Rect getCollisionBoundary();
+    int getCollisionDistance();
 
     /* Tile variables */
 private:
     unsigned int m_tileID;
     SDL_Rect collision_rect;
+    int collision_distance;
 
     /* User-defined properties */
 private:

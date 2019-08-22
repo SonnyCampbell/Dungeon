@@ -25,9 +25,40 @@ TMXTile::TMXTile()
 
 TMXTile::TMXTile(unsigned int tileID, std::unordered_map<std::string, std::string> &propertiesMap) : m_tileID(tileID), m_propertiesMap(propertiesMap)
 {
-    if (tileID == 34)
+    collision_distance = 5;
+
+    if (tileID == 34 || tileID == 36 || tileID == 259)
     {
         collision_rect = {0, 0, 16, 5};
+    }
+    else if (tileID == 290)
+    {
+        collision_rect = {0, 0, 5, 5};
+    }
+    else if (tileID == 257 || tileID == 289 || tileID == 261)
+    {
+        collision_rect = {11, 0, 5, 16};
+    }
+    else if (tileID == 225)
+    {
+        collision_rect = {11, 11, 5, 5};
+    }
+    else if (tileID == 258 || tileID == 262)
+    {
+        collision_rect = {0, 0, 5, 16};
+    }
+    else if (tileID == 259)
+    {
+        collision_rect = {0, 0, 16, 16};
+    }
+    else if (tileID == 2 || tileID == 3 || tileID == 4)
+    {
+        collision_rect = {0, 11, 16, 5};
+    }
+    else if (tileID == 226 || tileID == 260)
+    {
+        collision_rect = {0, 11, 5, 5};
+        collision_distance = 5;
     }
 }
 
@@ -71,4 +102,9 @@ void TMXTile::printData()
 SDL_Rect TMXTile::getCollisionBoundary()
 {
     return collision_rect;
+}
+
+int TMXTile::getCollisionDistance()
+{
+    return collision_distance;
 }

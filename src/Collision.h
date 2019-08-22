@@ -49,17 +49,17 @@ struct CollisionResponse
 namespace Collision
 {
 
-Vec2 tileToWorld(int x, int y, TMXTileSet &tileset)
+Vec2 tileToWorld(int x, int y, int w, int h, TMXTile &tile)
 {
-    return Vec2((float)x * tileset.getTileWidth(), (float)y * tileset.getTileHeight());
+    return Vec2((float)(x * w) + tile.getCollisionBoundary().x, (float)(y * h) + tile.getCollisionBoundary().y);
 }
 
-AABB tileToAABB(int x, int y, TMXTileSet &tileset)
+AABB tileToAABB(int x, int y, int w, int h, TMXTile &tile)
 {
-    Vec2 tile = tileToWorld(x, y, tileset);
-    Vec2 extents = Vec2(tileset.getTileWidth() / 2.f, tileset.getTileHeight() / 2.f);
+    Vec2 tile_in_world = tileToWorld(x, y, w, h, tile);
+    Vec2 extents = Vec2(tile.getCollisionBoundary().w / 2.f, tile.getCollisionBoundary().h / 2.f);
 
-    return AABB(tile + extents, extents);
+    return AABB(tile_in_world + extents, extents);
 }
 
 bool isInternalCollision(unsigned int tileX, unsigned int tileY, Vec2 normal, TMXTileLayer &tileLayer)
@@ -81,6 +81,27 @@ bool isInternalCollision(unsigned int tileX, unsigned int tileY, Vec2 normal, TM
     // match nextTile with None -> false | Some _ -> true
 }
 
+std::pair<bool, Contact> AABBvAABB(RigidBody a, RigidBody b, int collision_distance, unsigned int tileX, unsigned int tileY, TMXTileLayer &layer)
+{
+    auto combined_extents = a.aabb.halfExtents + b.aabb.halfExtents;
+    auto delta = b.aabb.center - a.aabb.center;
+
+    auto normal = -delta.major_axis();
+    auto plane_center = (normal * combined_extents) + b.aabb.center;
+
+    auto plane_delta = a.aabb.center - plane_center;
+    auto dist = Vec2::dot_product(plane_delta, normal);
+
+    auto internal_collision = isInternalCollision(tileX, tileY, normal, layer);
+    if (!internal_collision && dist < collision_distance)
+    {
+        auto contact = Contact(a, b, normal, dist, 0.f);
+        return std::pair<bool, Contact>(true, contact);
+    }
+
+    return std::pair<bool, Contact>(false, Contact());
+}
+
 std::pair<bool, Contact> AABBvAABB(RigidBody a, RigidBody b, unsigned int tileX, unsigned int tileY, TMXTileLayer &layer)
 {
     auto combined_extents = a.aabb.halfExtents + b.aabb.halfExtents;
@@ -93,7 +114,7 @@ std::pair<bool, Contact> AABBvAABB(RigidBody a, RigidBody b, unsigned int tileX,
     auto dist = Vec2::dot_product(plane_delta, normal);
 
     auto internal_collision = isInternalCollision(tileX, tileY, normal, layer);
-    if (!internal_collision)
+    if (!internal_collision && dist < 5)
     {
         auto contact = Contact(a, b, normal, dist, 0.f);
         return std::pair<bool, Contact>(true, contact);
@@ -122,7 +143,7 @@ std::vector<BroadphaseTile> getBroadphaseTiles(TMXTileLayer &tileLayer, TMXTileS
                 continue;
 
             auto tile = tileLayer.getTileVector()[x][y];
-            auto tileAABB = tileToAABB(x, y, tileset);
+            auto tileAABB = tileToAABB(x, y, tileset.getTileWidth(), tileset.getTileHeight(), *tile);
 
             tiles.push_back({*tile, tileAABB, x, y});
         }
@@ -171,19 +192,19 @@ CollisionResponse collisionResponse(float dt, Contact contact)
     return CollisionResponse({true, solved.a.velocity(), contact});
 }
 
-CollisionResponse innerCollide(TMXTileLayer &tileLayer, RigidBody moveableObject, AABB &tileAABB, TMXTile tile, float dt, int x, int y, SDL_Renderer *renderer)
+CollisionResponse innerCollide(TMXTileLayer &tileLayer, TMXTileSet &tileset, RigidBody moveableObject, AABB &tileAABB, TMXTile tile, float dt, int x, int y, SDL_Renderer *renderer)
 {
     auto tileRb = RigidBody(0.f, tile.getCollisionBoundary().w, tile.getCollisionBoundary().h, tileAABB.center, 0.f, Vec2::zero());
-    auto collision_contact = AABBvAABB(moveableObject, tileRb, x, y, tileLayer);
+    auto collision_contact = AABBvAABB(moveableObject, tileRb, tile.getCollisionDistance(), x, y, tileLayer);
 
     auto tileWidth = tileAABB.size().x();
     auto tileHeight = tileAABB.size().y();
     auto tileType = tile.getTileID();
 
     SDL_FRect srcrect = {((tileType - 1) % 32) * tileWidth, ((tileType - 1) / 32) * tileHeight, tileWidth, tileHeight}; // TODO Constant 32 = tiles wide/high (2 extra = layer around map?)
-    auto destX = x * tileWidth;
-    auto destY = y * tileHeight;
-    SDL_FRect debugRect = {destX, destY, tileWidth, tileHeight};
+    auto destX = x * tileset.getTileWidth();
+    auto destY = y * tileset.getTileHeight();
+    SDL_FRect debugRect = {destX, destY, tileset.getTileWidth(), tileset.getTileHeight()};
 
     if (collision_contact.first)
     {
@@ -231,7 +252,7 @@ std::vector<CollisionResponse> collision(TMXTileLayer &tileLayer, TMXTileSet &ti
         if (bp_tile.tile.getTileID() == 0)
             continue;
 
-        auto collision = innerCollide(tileLayer, rb, bp_tile.tileAABB, bp_tile.tile, dt, bp_tile.x, bp_tile.y, renderer);
+        auto collision = innerCollide(tileLayer, tileset, rb, bp_tile.tileAABB, bp_tile.tile, dt, bp_tile.x, bp_tile.y, renderer);
         if (collision.collision)
         {
             collisionResponses.push_back(collision);
