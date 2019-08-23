@@ -1,6 +1,13 @@
 #pragma once
 #include "RigidBody.h"
 #include "AnimatedSprite.h"
+#include "AttackTypes.h"
+
+struct AttackFrame
+{
+    float angle;
+    Vec2 attack_offset;
+};
 
 class Weapon
 {
@@ -13,12 +20,26 @@ private:
     int current_frame = 0;
     int direction = 0;
 
+    bool isAttacking = false;
+    AttackTypes attack_type;
+    double attack_time = 500; //ms
+    double last_frame_time = 0;
+    int current_attack_frame = 0;
+    AttackFrame basic_attack_framse[4] =
+        {{20.f, Vec2(0, -8)},
+         {120.f, Vec2(7, 7)},
+         {160.f, Vec2(0, 10)},
+         {190.f, Vec2(-10, 10)}};
+    float frame_length = 16.6f;
+
 public:
     Weapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 offset, int current_frame);
     ~Weapon();
     RigidBody getRigidBody();
     void Draw(Vec2 position, int frame, bool facingRight);
     void ResetFrames();
+    void Attack(AttackTypes attack_type);
+    void Update(double elapsed_game_time);
 };
 
 Weapon::Weapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 offset, int current_frame_count)
@@ -49,26 +70,69 @@ void Weapon::ResetFrames()
     direction = 0;
 }
 
+void Weapon::Attack(AttackTypes new_attack_type)
+{
+    printf("Attack!\n");
+    if (!isAttacking)
+    {
+        isAttacking = true;
+        attack_type = new_attack_type;
+    }
+}
+
+void Weapon::Update(double elapsed_game_time)
+{
+    if (isAttacking)
+    {
+        if (elapsed_game_time - last_frame_time > frame_length)
+        {
+
+            last_frame_time = elapsed_game_time;
+            auto next_frame = current_attack_frame + 1;
+            if (next_frame >= 4)
+            {
+                isAttacking = false;
+                current_attack_frame = 0;
+                ResetFrames();
+                return;
+            }
+            current_attack_frame = (next_frame) % 4;
+        }
+    }
+}
+
 void Weapon::Draw(Vec2 position, int frame, bool facingRight)
 {
-    if (current_frame != frame)
+    if (!isAttacking)
     {
-        direction += (frame == 1 || frame == 2) ? 1 : -1;
-    }
+        if (current_frame != frame)
+        {
+            direction += (frame == 1 || frame == 2) ? 1 : -1;
+        }
 
-    printf("Frame %d - Current_Frame %d \n", frame, current_frame);
-    printf("Direction %d \n", direction);
+        if (facingRight)
+        {
+            texture.renderF(position.x(), position.y() - offset.y() + direction, &spritesheet_clip, 90.f, NULL, SDL_FLIP_NONE);
+        }
+        else
+        {
+            texture.renderF(position.x() - offset.x(), position.y() - offset.y() + direction + 1, &spritesheet_clip, -90.f, NULL, SDL_FLIP_NONE);
+        }
 
-    if (facingRight)
-    {
-        texture.renderF(position.x(), position.y() - offset.y() + direction, &spritesheet_clip, 90.f, NULL, SDL_FLIP_NONE);
+        current_frame = frame;
     }
     else
     {
-        texture.renderF(position.x() - offset.x(), position.y() - offset.y() + direction + 1, &spritesheet_clip, -90.f, NULL, SDL_FLIP_NONE);
+        auto attack = basic_attack_framse[current_attack_frame];
+        if (facingRight)
+        {
+            texture.renderF(position.x() + attack.attack_offset.x(), position.y() - offset.y() + attack.attack_offset.y(), &spritesheet_clip, attack.angle, NULL, SDL_FLIP_NONE);
+        }
+        else
+        {
+            texture.renderF(position.x() - offset.x() - attack.attack_offset.x(), position.y() - offset.y() + attack.attack_offset.y() + 1, &spritesheet_clip, -attack.angle, NULL, SDL_FLIP_NONE);
+        }
     }
-
-    current_frame = frame;
 }
 
 Weapon *createSword(SDL_Renderer **renderer, Vec2 position, int current_frame)

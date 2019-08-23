@@ -132,10 +132,6 @@ void close()
 
 void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
 {
-    //Clear screen
-    SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    SDL_RenderClear(gRenderer);
-
     unsigned int tileID = 0;
 
     int tileWidth = map1->getTileWidth();
@@ -261,12 +257,14 @@ int main(int argc, char *args[])
         currentTick = SDL_GetTicks();
         dt = (currentTick - lastTick) / 1000.0f;
         lastTick = currentTick;
+        //Clear screen
+        SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SDL_RenderClear(gRenderer);
 
         HandleInput(event, quit);
 
         render(gRenderer, gSpriteSheetTexture, loader);
         Update(currentTick, dt);
-
         //Update screen
         SDL_RenderPresent(gRenderer);
 

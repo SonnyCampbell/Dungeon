@@ -3,6 +3,7 @@
 #include "Vec2.h"
 #include "RigidBody.h"
 #include "Weapon.h"
+#include "AttackTypes.h"
 
 class Player
 {
@@ -42,9 +43,10 @@ public:
 
     void Draw();
     void Update(double currentTick, float dt);
-    //void MovePlayer(Vec2 movementVector, float dt);
+    //void MovePlayer(Vec2 movement_vector, float dt);
     void HandleInputEvent(const SDL_Event &event, float dt);
-    void UpdateDirection(Vec2 movementVector);
+    void UpdateDirection(Vec2 movement_vector);
+    void Attack(AttackTypes attack_type);
 };
 
 void Player::Update(double currentTick, float dt)
@@ -69,6 +71,10 @@ void Player::Update(double currentTick, float dt)
     }
 
     sprite->UpdateAnimation(sprite->currentAnimationKey, currentTick);
+    if (weapon != nullptr)
+    {
+        weapon->Update(currentTick);
+    }
 }
 
 void Player::Draw()
@@ -104,6 +110,9 @@ void Player::HandleInputEvent(const SDL_Event &event, float dt)
             sprite->facingRight = true; //Maybe put this in update and do it based on direction vector to prevent moonwalking. Looks fun to moonwalk though.
             UpdateDirection(Vec2(1, 0));
             break;
+        case SDLK_SPACE:
+            Attack(AttackTypes::BasicAttack);
+            break;
         }
     }
     else if (event.type == SDL_KEYUP && event.key.repeat == 0)
@@ -126,7 +135,12 @@ void Player::HandleInputEvent(const SDL_Event &event, float dt)
     }
 }
 
-void Player::UpdateDirection(Vec2 movementVector)
+void Player::Attack(AttackTypes attack_type)
 {
-    rb.direction += movementVector;
+    weapon->Attack(attack_type);
+}
+
+void Player::UpdateDirection(Vec2 movement_vector)
+{
+    rb.direction += movement_vector;
 }
