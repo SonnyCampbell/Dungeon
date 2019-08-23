@@ -25,9 +25,10 @@ TMXTile::TMXTile()
 
 TMXTile::TMXTile(unsigned int tileID, std::unordered_map<std::string, std::string> &propertiesMap) : m_tileID(tileID), m_propertiesMap(propertiesMap)
 {
+    //TODO Should all be properties of the tileset in Tiled
     collision_distance = 5;
 
-    if (tileID == 34 || tileID == 36 || tileID == 259)
+    if (tileID == 34 || tileID == 36 || tileID == 259 || tileID == 323)
     {
         collision_rect = {0, 0, 16, 5};
     }

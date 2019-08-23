@@ -2,6 +2,7 @@
 #include "AnimatedSprite.h"
 #include "Vec2.h"
 #include "RigidBody.h"
+#include "Weapon.h"
 
 class Player
 {
@@ -9,6 +10,11 @@ private:
 public:
     AnimatedSprite *sprite;
     RigidBody rb;
+
+    // If I change this to [Weapon weapon] and assign as
+    // weapon = Weapon(renderer) in the constructor,
+    // why doesn't weapon.Draw() work???
+    Weapon *weapon;
 
     Player(SDL_Renderer **renderer, Vec2 position, float speed = 166.0f) : rb(60.f, 16.f, 20.f, position, speed, Vec2(0, 0))
     {
@@ -25,11 +31,13 @@ public:
                                                                                                    {WalkRight, new Animation(4, runFps, frameSize, {192, 36})}});
 
         sprite = new AnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, WalkUp);
+        weapon = createSword(renderer, rb.aabb.center, 0);
     }
 
     ~Player()
     {
         delete sprite;
+        delete weapon;
     }
 
     void Draw();
@@ -48,6 +56,7 @@ void Player::Update(double currentTick, float dt)
         if (sprite->currentAnimationKey != IdleUp)
         {
             sprite->ResetAnimation(IdleUp);
+            weapon->ResetFrames();
         }
     }
     else
@@ -55,6 +64,7 @@ void Player::Update(double currentTick, float dt)
         if (sprite->currentAnimationKey != WalkUp)
         {
             sprite->ResetAnimation(WalkUp);
+            weapon->ResetFrames();
         }
     }
 
@@ -64,13 +74,14 @@ void Player::Update(double currentTick, float dt)
 void Player::Draw()
 {
     sprite->Draw(rb.aabb.min());
+    weapon->Draw(rb.aabb.center, sprite->CurrentAnimation()->currentFrameCount(), sprite->facingRight);
 
     //DEBUG DRAWING
-    SDL_FRect debug_rect = {rb.aabb.min().x(), rb.aabb.min().y(), (float)sprite->CurrentAnimation()->CurrentFrame().w, (float)sprite->CurrentAnimation()->CurrentFrame().h};
-    SDL_SetRenderDrawColor(*sprite->texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-    SDL_RenderDrawRectF(*sprite->texture.gRenderer, &debug_rect);
-    SDL_SetRenderDrawColor(*sprite->texture.gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-    SDL_RenderDrawPointF(*sprite->texture.gRenderer, rb.aabb.center.x(), rb.aabb.center.y());
+    // SDL_FRect debug_rect = {rb.aabb.min().x(), rb.aabb.min().y(), (float)sprite->CurrentAnimation()->CurrentFrame().w, (float)sprite->CurrentAnimation()->CurrentFrame().h};
+    // SDL_SetRenderDrawColor(*sprite->texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+    // SDL_RenderDrawRectF(*sprite->texture.gRenderer, &debug_rect);
+    // SDL_SetRenderDrawColor(*sprite->texture.gRenderer, 0xFF, 0x00, 0x00, 0xFF);
+    // SDL_RenderDrawPointF(*sprite->texture.gRenderer, rb.aabb.center.x(), rb.aabb.center.y());
 }
 
 void Player::HandleInputEvent(const SDL_Event &event, float dt)

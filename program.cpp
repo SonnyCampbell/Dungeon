@@ -62,6 +62,7 @@ bool init()
 
     //Initialize renderer color
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_RenderSetScale(gRenderer, 1.5, 1.5);
 
     //Initialize PNG loading
     int imgFlags = IMG_INIT_PNG;
@@ -203,38 +204,6 @@ void Update(double currentTick, float dt)
         currentDirection.normalize();
         auto collision_corrected_direction = Vec2(currentDirection.x() - (currentDirection.x() * collision_vector.x()), currentDirection.y() - (currentDirection.y() * collision_vector.y()));
         player->rb.aabb.center = player->rb.aabb.center + (collision_corrected_direction * player->rb.speed * dt);
-
-        // std::sort(collisions.begin(), collisions.end(), [](CollisionResponse cr1, CollisionResponse cr2) {
-        //     return cr1.contact.distance < cr1.contact.distance;
-        // });
-
-        // auto collision = collisions[0];
-        // printf("ACV: %f %f\n", collision.contact.normal.x(), collision.contact.normal.y());
-
-        // Vec2 after_collision_velocity;
-        // if (collision.collision == false)
-        // {
-        //     after_collision_velocity = player->rb.velocity();
-        // }
-        // else
-        // {
-
-        //     after_collision_velocity = collision.velocity;
-        //     // if (after_collision_velocity.length() > 0.f)
-        //     //     printf("ACV: %f %f\n", after_collision_velocity.x(), after_collision_velocity.y());
-        // }
-
-        // auto max_clamp = Vec2((map1->getWidth() * map1->getTileWidth() - player->rb.aabb.halfExtents.x()),
-        //                       (map1->getHeight() * map1->getTileHeight() - player->rb.aabb.halfExtents.y()));
-
-        // auto new_position = player->rb.aabb.center + (after_collision_velocity * dt);
-        // new_position = Vec2::clamp(new_position, player->rb.aabb.halfExtents, max_clamp);
-
-        //player->rb.direction = after_collision_velocity.normalized_vector();
-        //player->rb.speed = after_collision_velocity.length();
-        // Vec2 currentDirection = Vec2(player->rb.direction.x(), player->rb.direction.y());
-        // currentDirection.normalize();
-        //player->rb.aabb.center = new_position;
 
         return;
     }

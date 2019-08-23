@@ -10,7 +10,7 @@ public:
     SDL_Rect *frames;
     int framesCount;
     int fps = 60;
-    int currentFrame;
+    int current_frame;
     double lastFrameTime;
     double frameLength;
     Vec2 size;
@@ -28,7 +28,7 @@ public:
         }
 
         fps = _fps;
-        currentFrame = 0;
+        current_frame = 0;
         lastFrameTime = 0;
         frameLength = 1000 * (1.0f / fps);
     }
@@ -39,16 +39,21 @@ public:
 
     SDL_Rect CurrentFrame()
     {
-        if (currentFrame >= framesCount)
+        if (current_frame >= framesCount)
         {
             return {0, 0, 0, 0};
         }
-        return frames[currentFrame];
+        return frames[current_frame];
+    }
+
+    int currentFrameCount()
+    {
+        return current_frame;
     }
 
     void Reset()
     {
-        currentFrame = 0;
+        current_frame = 0;
         lastFrameTime = 0;
     }
 
@@ -58,7 +63,7 @@ public:
         if (elapsedGameTime - lastFrameTime > frameLength)
         {
             lastFrameTime = elapsedGameTime;
-            currentFrame = (currentFrame + 1) % framesCount;
+            current_frame = (current_frame + 1) % framesCount;
         }
 
         return this;
