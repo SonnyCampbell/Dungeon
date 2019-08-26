@@ -179,7 +179,7 @@ void Update(double currentTick, float dt)
 
     if (collisions.size() > 0)
     {
-        auto collision_vector = Vec2();
+        auto collision_vector = Vec2(0, 0);
 
         for (int i = 0; i < collisions.size(); i++)
         {
@@ -263,8 +263,9 @@ int main(int argc, char *args[])
 
         HandleInput(event, quit);
 
-        render(gRenderer, gSpriteSheetTexture, loader);
         Update(currentTick, dt);
+        render(gRenderer, gSpriteSheetTexture, loader);
+
         //Update screen
         SDL_RenderPresent(gRenderer);
 
