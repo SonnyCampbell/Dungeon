@@ -3,7 +3,6 @@
 #include <SDL.h>
 #include <stdio.h>
 #include <iostream>
-
 #include "LTexture.h"
 #include "AnimationKey.h"
 #include "Animation.h"

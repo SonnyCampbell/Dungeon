@@ -32,7 +32,7 @@ LTexture gSpriteSheetTexture(&gRenderer);
 //The surface contained by the window
 SDL_Surface *gScreenSurface = NULL;
 
-Player *player = NULL;
+Player player = {};
 
 bool init()
 {
@@ -168,14 +168,14 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
         }
     }
 
-    player->Draw();
+    Thing::DrawPlayer(player);
 }
 
 void Update(double currentTick, float dt)
 {
-    player->Update(currentTick, dt);
+    Thing::UpdatePlayer(player, currentTick, dt);
     auto collision_layer = map1->getTileLayers()->at(2);
-    auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player->rb, dt, gRenderer);
+    auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player.rb, dt, gRenderer);
 
     if (collisions.size() > 0)
     {
@@ -184,29 +184,29 @@ void Update(double currentTick, float dt)
         for (int i = 0; i < collisions.size(); i++)
         {
             auto collision_normal = collisions[i].contact.normal;
-            if ((collision_normal.x() > 0.f && player->rb.direction.x() < 0.f) || (collision_normal.x() < 0.f && player->rb.direction.x() > 0.f))
+            if ((collision_normal.x() > 0.f && player.rb.direction.x() < 0.f) || (collision_normal.x() < 0.f && player.rb.direction.x() > 0.f))
             {
                 collision_vector = Vec2(1.f, collision_vector.y());
-                //player->rb.direction = Vec2(0.f, player->rb.direction.y());
+                //player.rb.direction = Vec2(0.f, player.rb.direction.y());
             }
-            if ((collision_normal.y() > 0.f && player->rb.direction.y() < 0.f) || (collision_normal.y() < 0.f && player->rb.direction.y() > 0.f))
+            if ((collision_normal.y() > 0.f && player.rb.direction.y() < 0.f) || (collision_normal.y() < 0.f && player.rb.direction.y() > 0.f))
             {
                 collision_vector = Vec2(collision_vector.x(), 1.f);
-                //player->rb.direction = Vec2(player->rb.direction.x(), 0.f);
+                //player.rb.direction = Vec2(player.rb.direction.x(), 0.f);
             }
         }
 
-        Vec2 currentDirection = Vec2(player->rb.direction.x(), player->rb.direction.y());
+        Vec2 currentDirection = Vec2(player.rb.direction.x(), player.rb.direction.y());
         currentDirection.normalize();
         auto collision_corrected_direction = Vec2(currentDirection.x() - (currentDirection.x() * collision_vector.x()), currentDirection.y() - (currentDirection.y() * collision_vector.y()));
-        player->rb.aabb.center = player->rb.aabb.center + (collision_corrected_direction * player->rb.speed * dt);
+        player.rb.aabb.center = player.rb.aabb.center + (collision_corrected_direction * player.rb.speed * dt);
 
         return;
     }
 
-    Vec2 currentDirection = Vec2(player->rb.direction.x(), player->rb.direction.y());
+    Vec2 currentDirection = Vec2(player.rb.direction.x(), player.rb.direction.y());
     currentDirection.normalize();
-    player->rb.aabb.center = player->rb.aabb.center + (currentDirection * player->rb.speed * dt);
+    player.rb.aabb.center = player.rb.aabb.center + (currentDirection * player.rb.speed * dt);
 }
 
 void HandleInput(SDL_Event &event, bool &quit)
@@ -228,7 +228,7 @@ void HandleInput(SDL_Event &event, bool &quit)
             }
         }
 
-        player->HandleInputEvent(event, dt);
+        Thing::PlayerHandleInputEvent(event, player, dt);
     }
 }
 
@@ -247,7 +247,7 @@ int main(int argc, char *args[])
         return 0;
     }
 
-    player = new Player(&gRenderer, {100, 100});
+    player = Thing::NewPlayer(&gRenderer, {100, 100});
 
     int totalFrames = 0;
     bool quit = false;

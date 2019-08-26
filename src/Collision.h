@@ -70,15 +70,6 @@ bool isInternalCollision(unsigned int tileX, unsigned int tileY, Vec2 normal, TM
     //auto current_tile = tileLayer.getTileVector()[tileX][tileY];
     //auto next_tile = tileLayer.getTileVector()[nextTileX][nextTileY];
     return tileLayer.getTileId(next_tile_X, next_tile_y) > 0;
-
-    // let isInternalCollision (tileX: int) (tileY: int) (normal: Vector2) (tileLayer: TiledMapTileLayer) =
-    // let nextTileX = tileX + int normal.X
-    // let nextTileY = tileY + int normal.Y
-
-    // let currentTile = TiledMapTileLayer.getTileId tileX tileY tileLayer
-    // let nextTile = TiledMapTileLayer.getTileId nextTileX nextTileY tileLayer
-
-    // match nextTile with None -> false | Some _ -> true
 }
 
 std::pair<bool, Contact> AABBvAABB(RigidBody a, RigidBody b, int collision_distance, unsigned int tileX, unsigned int tileY, TMXTileLayer &layer)
@@ -186,9 +177,7 @@ Contact speculativeSolver(float dt, Contact contact)
 CollisionResponse collisionResponse(float dt, Contact contact)
 {
     auto solved = speculativeSolver(dt, contact);
-    // let solved = Speculative.speculativeSolver dt contact
 
-    //     solved.a.velocity, contact
     return CollisionResponse({true, solved.a.velocity(), contact});
 }
 
@@ -221,13 +210,6 @@ CollisionResponse innerCollide(TMXTileLayer &tileLayer, TMXTileSet &tileset, Rig
     SDL_RenderDrawRectF(renderer, &debugRect);
 
     return CollisionResponse();
-    // let tileRigidBody = RigidBody.create(0.f, tileAabb.size.X, tileAabb.size.Y, tileAabb.center, Vector2.Zero)
-    //         let collision, contact = AABBvAABB moveableObject tileRigidBody x y tileLayer
-
-    //         if collision then
-    //             //let pixelCollision = intersectsPixels
-    //             Some (collisionResponse moveableObject tileRigidBody contact dt)
-    //         else None
 }
 
 std::vector<CollisionResponse> collision(TMXTileLayer &tileLayer, TMXTileSet &tileset, RigidBody rb, float dt, SDL_Renderer *renderer)
@@ -260,18 +242,6 @@ std::vector<CollisionResponse> collision(TMXTileLayer &tileLayer, TMXTileSet &ti
     }
 
     return collisionResponses;
-
-    //     |> List.choose(fun (tileid, tileaabb, x,y) -> innerCollide map rigidBody tileaabb tileid dt x y)
 }
-
-// let broadphaseTiles =
-//     [for x in minX..maxX do
-//          for y in minY..maxY do
-//              let tileaabb = TiledMapTileset.toAABB x y tileset
-//              let tileId = TiledMapTileLayer.getTileId x y tileLayer
-
-//              yield tileId, tileaabb, x, y]
-
-// broadphaseTiles
 
 } // namespace Collision
