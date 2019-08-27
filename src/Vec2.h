@@ -50,7 +50,7 @@ public:
     inline Vec2 major_axis();
 };
 
-float clip(float n, float lower, float upper)
+inline float clip(float n, float lower, float upper)
 {
     return std::max(lower, std::min(n, upper));
 }

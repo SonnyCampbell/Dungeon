@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "LTexture.h"
+#include "src/LTexture.h"
 #include "src/AnimatedSprite.h"
 #include "src/AnimationKey.h"
 #include "src/Player.h"
@@ -174,6 +174,7 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
 void Update(double currentTick, float dt)
 {
     Thing::UpdatePlayer(player, currentTick, dt);
+    printf("DIrection %f %f \n", player.rb.direction.x(), player.rb.direction.y());
     auto collision_layer = map1->getTileLayers()->at(2);
     auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player.rb, dt, gRenderer);
 

@@ -21,14 +21,14 @@ Player NewPlayer(SDL_Renderer **renderer, Vec2 position, float speed)
     auto rb = RigidBody(60.f, 16.f, 20.f, position, speed, Vec2(0, 0));
 
     auto sprite = new AnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, WalkUp);
-    auto weapon = createSword(renderer, rb.aabb.center, 0);
+    auto weapon = Weapon::createSword(renderer, rb.aabb.center, 0);
 
     Player player = {sprite, rb, weapon};
 
     return player;
 }
 
-void UpdatePlayer(Player player, double currentTick, float dt)
+void UpdatePlayer(Player &player, double currentTick, float dt)
 {
     Vec2 currentDirection = Vec2(player.rb.direction.x(), player.rb.direction.y());
 
@@ -52,12 +52,11 @@ void UpdatePlayer(Player player, double currentTick, float dt)
     player.sprite->UpdateAnimation(player.sprite->currentAnimationKey, currentTick);
     if (player.weapon)
     {
-        player.weapon = NULL;
         player.weapon->Update(currentTick);
     }
 }
 
-void DrawPlayer(Player player)
+void DrawPlayer(Player &player)
 {
     player.sprite->Draw(player.rb.aabb.min());
     player.weapon->Draw(player.rb.aabb.center, player.sprite->CurrentAnimation()->currentFrameCount(), player.sprite->facingRight);
@@ -70,7 +69,7 @@ void DrawPlayer(Player player)
     // SDL_RenderDrawPointF(*sprite->texture.gRenderer, rb.aabb.center.x(), rb.aabb.center.y());
 }
 
-void PlayerHandleInputEvent(const SDL_Event &event, Player player, float dt)
+void PlayerHandleInputEvent(const SDL_Event &event, Player &player, float dt)
 {
     if (event.type == SDL_KEYDOWN && event.key.repeat == 0)
     {
@@ -122,7 +121,7 @@ void PlayerAttack(Player player, AttackTypes attack_type)
         player.weapon->Attack(attack_type);
     }
 }
-void UpdatePlayerDirection(Player player, Vec2 movement_vector)
+void UpdatePlayerDirection(Player &player, Vec2 movement_vector)
 {
     player.rb.direction += movement_vector;
 }
