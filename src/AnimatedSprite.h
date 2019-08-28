@@ -8,73 +8,29 @@
 #include "Animation.h"
 #include "Vec2.h"
 
-class AnimatedSprite
+struct AnimatedSprite
 {
-private:
-    /* data */
-public:
     LTexture texture;
     std::map<AnimationKey, Animation *> *animations;
     AnimationKey currentAnimationKey;
     bool isAnimating;
     bool facingRight;
-
-    AnimatedSprite(SDL_Renderer **renderer, std::string texturePath, std::map<AnimationKey, Animation *> *_animations, AnimationKey _animationKey) : texture(renderer)
-    {
-        if (!texture.loadFromFile(texturePath))
-        {
-            printf("fuck");
-        }
-        animations = _animations;
-        currentAnimationKey = _animationKey;
-        isAnimating = true;
-        facingRight = true;
-    }
-
-    ~AnimatedSprite()
-    {
-        delete animations;
-    }
-
-    Animation *CurrentAnimation()
-    {
-        return animations->at(currentAnimationKey);
-    }
-
-    Vec2 Size()
-    {
-        return CurrentAnimation()->size;
-    }
-
-    void ResetAnimation(AnimationKey key)
-    {
-        currentAnimationKey = key;
-        animations->at(key)->Reset();
-    }
-
-    Animation *UpdateAnimation(AnimationKey key, double elapsedGameTime)
-    {
-        if (isAnimating)
-        {
-            return animations->at(key)->Update(elapsedGameTime);
-        }
-        else
-        {
-            return animations->at(key);
-        }
-    }
-
-    void Draw(Vec2 position)
-    {
-        SDL_Rect currentClip = CurrentAnimation()->CurrentFrame();
-
-        if (facingRight)
-        {
-            texture.renderF(position.x(), position.y(), &currentClip, NULL, NULL, SDL_FLIP_NONE);
-        }
-        else
-        {
-            texture.renderF(position.x(), position.y(), &currentClip, NULL, NULL, SDL_FLIP_HORIZONTAL);
-        }
-    }
 };
+
+namespace AnimatedSpriteManager
+{
+AnimatedSprite *NewAnimatedSprite(SDL_Renderer **renderer, std::string texturePath, std::map<AnimationKey, Animation *> *animations, AnimationKey animationKey);
+
+void DeleteAnimatedSprite(AnimatedSprite &sprite);
+
+Animation *CurrentAnimation(const AnimatedSprite &sprite);
+
+Vec2 Size(const AnimatedSprite &sprite);
+
+void ResetAnimation(AnimatedSprite &sprite, AnimationKey key);
+
+Animation *UpdateAnimation(AnimatedSprite &sprite, AnimationKey key, double elapsedGameTime);
+
+void DrawSprite(AnimatedSprite &sprite, Vec2 position);
+
+}; // namespace AnimatedSpriteManager

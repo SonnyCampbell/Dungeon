@@ -1,7 +1,9 @@
 #pragma once
 #include "Player.h"
 
-namespace Thing
+using namespace AnimatedSpriteManager;
+
+namespace PlayerManager
 {
 
 Player NewPlayer(SDL_Renderer **renderer, Vec2 position, float speed)
@@ -20,7 +22,7 @@ Player NewPlayer(SDL_Renderer **renderer, Vec2 position, float speed)
 
     auto rb = RigidBody(60.f, 16.f, 20.f, position, speed, Vec2(0, 0));
 
-    auto sprite = new AnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, WalkUp);
+    auto sprite = NewAnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, WalkUp);
     auto weapon = Weapon::createSword(renderer, rb.aabb.center, 0);
 
     Player player = {sprite, rb, weapon};
@@ -36,7 +38,7 @@ void UpdatePlayer(Player &player, double currentTick, float dt)
     {
         if (player.sprite->currentAnimationKey != IdleUp)
         {
-            player.sprite->ResetAnimation(IdleUp);
+            ResetAnimation(*player.sprite, IdleUp);
             player.weapon->ResetFrames();
         }
     }
@@ -44,12 +46,12 @@ void UpdatePlayer(Player &player, double currentTick, float dt)
     {
         if (player.sprite->currentAnimationKey != WalkUp)
         {
-            player.sprite->ResetAnimation(WalkUp);
+            ResetAnimation(*player.sprite, WalkUp);
             player.weapon->ResetFrames();
         }
     }
 
-    player.sprite->UpdateAnimation(player.sprite->currentAnimationKey, currentTick);
+    UpdateAnimation(*player.sprite, player.sprite->currentAnimationKey, currentTick);
     if (player.weapon)
     {
         player.weapon->Update(currentTick);
@@ -58,8 +60,8 @@ void UpdatePlayer(Player &player, double currentTick, float dt)
 
 void DrawPlayer(Player &player)
 {
-    player.sprite->Draw(player.rb.aabb.min());
-    player.weapon->Draw(player.rb.aabb.center, player.sprite->CurrentAnimation()->currentFrameCount(), player.sprite->facingRight);
+    DrawSprite(*player.sprite, player.rb.aabb.min());
+    player.weapon->Draw(player.rb.aabb.center, CurrentAnimation(*player.sprite)->currentFrameCount(), player.sprite->facingRight);
 
     //DEBUG DRAWING
     // SDL_FRect debug_rect = {rb.aabb.min().x(), rb.aabb.min().y(), (float)sprite->CurrentAnimation()->CurrentFrame().w, (float)sprite->CurrentAnimation()->CurrentFrame().h};
@@ -125,4 +127,4 @@ void UpdatePlayerDirection(Player &player, Vec2 movement_vector)
 {
     player.rb.direction += movement_vector;
 }
-} // namespace Thing
+} // namespace PlayerManager

@@ -11,6 +11,8 @@
 #include "src/TMXLoader/TMXLoader.h"
 #include "src/Collision.h"
 
+using namespace PlayerManager;
+
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
@@ -168,12 +170,12 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
         }
     }
 
-    Thing::DrawPlayer(player);
+    DrawPlayer(player);
 }
 
 void Update(double currentTick, float dt)
 {
-    Thing::UpdatePlayer(player, currentTick, dt);
+    UpdatePlayer(player, currentTick, dt);
     printf("DIrection %f %f \n", player.rb.direction.x(), player.rb.direction.y());
     auto collision_layer = map1->getTileLayers()->at(2);
     auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player.rb, dt, gRenderer);
@@ -229,7 +231,7 @@ void HandleInput(SDL_Event &event, bool &quit)
             }
         }
 
-        Thing::PlayerHandleInputEvent(event, player, dt);
+        PlayerHandleInputEvent(event, player, dt);
     }
 }
 
@@ -248,7 +250,7 @@ int main(int argc, char *args[])
         return 0;
     }
 
-    player = Thing::NewPlayer(&gRenderer, {100, 100});
+    player = NewPlayer(&gRenderer, {100, 100});
 
     int totalFrames = 0;
     bool quit = false;
