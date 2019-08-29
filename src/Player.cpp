@@ -2,6 +2,7 @@
 #include "Player.h"
 
 using namespace AnimatedSpriteManager;
+using namespace WeaponManager;
 
 namespace PlayerManager
 {
@@ -23,9 +24,10 @@ Player NewPlayer(SDL_Renderer **renderer, Vec2 position, float speed)
     auto rb = RigidBody(60.f, 16.f, 20.f, position, speed, Vec2(0, 0));
 
     auto sprite = NewAnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, WalkUp);
-    auto weapon = Weapon::createSword(renderer, rb.aabb.center, 0);
 
-    Player player = {sprite, rb, weapon};
+    //auto weapon = createSword(renderer, rb.aabb.center, 0);
+
+    Player player = {sprite, rb, nullptr};
 
     return player;
 }
@@ -39,7 +41,7 @@ void UpdatePlayer(Player &player, double currentTick, float dt)
         if (player.sprite->currentAnimationKey != IdleUp)
         {
             ResetAnimation(*player.sprite, IdleUp);
-            player.weapon->ResetFrames();
+            //ResetFrames(*player.weapon);
         }
     }
     else
@@ -47,21 +49,21 @@ void UpdatePlayer(Player &player, double currentTick, float dt)
         if (player.sprite->currentAnimationKey != WalkUp)
         {
             ResetAnimation(*player.sprite, WalkUp);
-            player.weapon->ResetFrames();
+            //ResetFrames(*player.weapon);
         }
     }
 
     UpdateAnimation(*player.sprite, player.sprite->currentAnimationKey, currentTick);
-    if (player.weapon)
-    {
-        player.weapon->Update(currentTick);
-    }
+    // if (player.weapon)
+    // {
+    //     UpdateWeapon(*player.weapon, currentTick);
+    // }
 }
 
 void DrawPlayer(Player &player)
 {
     DrawSprite(*player.sprite, player.rb.aabb.min());
-    player.weapon->Draw(player.rb.aabb.center, CurrentAnimation(*player.sprite)->currentFrameCount(), player.sprite->facingRight);
+    //DrawWeapon(*player.weapon, player.rb.aabb.center, CurrentAnimation(*player.sprite)->currentFrameCount(), player.sprite->facingRight);
 }
 
 void DrawPlayerDebugRect(Player &player)
@@ -123,7 +125,7 @@ void PlayerAttack(Player player, AttackTypes attack_type)
 {
     if (player.weapon != nullptr)
     {
-        player.weapon->Attack(attack_type);
+        //WeaponAttack(*player.weapon, attack_type);
     }
 }
 void UpdatePlayerDirection(Player &player, Vec2 movement_vector)

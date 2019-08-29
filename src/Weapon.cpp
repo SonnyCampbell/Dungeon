@@ -1,99 +1,98 @@
 #include "Weapon.h"
 
-Weapon::Weapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 offset, int current_frame_count)
-    : texture(renderer), rb(0.f, clip.w, clip.h, position, 0.f, Vec2::zero()), offset(offset)
+namespace WeaponManager
+{
+
+Weapon *NewWeapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 offset, int current_frame_count)
 {
     //Don't load this from file every time - copy existing spritesheet texture
+    auto texture = LTexture(renderer);
     if (!texture.loadFromFile("assets/DungeonTilesetV2.png"))
     {
         printf("fuck");
     }
+    auto rb = RigidBody(0.f, clip.w, clip.h, position, 0.f, Vec2::zero());
 
-    spritesheet_clip = clip;
-    current_frame = current_frame_count;
+    return new Weapon{texture, rb, offset, clip, current_frame_count};
 }
 
-Weapon::~Weapon()
+void DeleteWeapon()
 {
 }
 
-RigidBody Weapon::getRigidBody()
+void ResetFrames(Weapon &weapon)
 {
-    return rb;
+    weapon.current_frame = 0;
+    weapon.direction = 0;
 }
 
-void Weapon::ResetFrames()
-{
-    current_frame = 0;
-    direction = 0;
-}
-
-void Weapon::Attack(AttackTypes new_attack_type)
+void WeaponAttack(Weapon &weapon, AttackTypes new_attack_type)
 {
     printf("Attack!\n");
-    if (!isAttacking)
+    if (!weapon.isAttacking)
     {
-        isAttacking = true;
-        attack_type = new_attack_type;
+        weapon.isAttacking = true;
+        weapon.attack_type = new_attack_type;
     }
 }
 
-void Weapon::Update(double elapsed_game_time)
+void UpdateWeapon(Weapon &weapon, double elapsed_game_time)
 {
-    if (isAttacking)
+    if (weapon.isAttacking)
     {
-        if (elapsed_game_time - last_frame_time > frame_length)
+        if (elapsed_game_time - weapon.last_frame_time > weapon.frame_length)
         {
 
-            last_frame_time = elapsed_game_time;
-            auto next_frame = current_attack_frame + 1;
+            weapon.last_frame_time = elapsed_game_time;
+            auto next_frame = weapon.current_attack_frame + 1;
             if (next_frame >= 4)
             {
-                isAttacking = false;
-                current_attack_frame = 0;
-                ResetFrames();
+                weapon.isAttacking = false;
+                weapon.current_attack_frame = 0;
+                ResetFrames(weapon);
                 return;
             }
-            current_attack_frame = (next_frame) % 4;
+            weapon.current_attack_frame = (next_frame) % 4;
         }
     }
 }
 
-void Weapon::Draw(Vec2 position, int frame, bool facingRight)
+void DrawWeapon(Weapon &weapon, Vec2 position, int frame, bool facingRight)
 {
-    if (!isAttacking)
+    if (!weapon.isAttacking)
     {
-        if (current_frame != frame)
+        if (weapon.current_frame != frame)
         {
-            direction += (frame == 1 || frame == 2) ? 1 : -1;
+            weapon.direction += (frame == 1 || frame == 2) ? 1 : -1;
         }
 
         if (facingRight)
         {
-            texture.renderF(position.x(), position.y() - offset.y() + direction, &spritesheet_clip, 90.f, NULL, SDL_FLIP_NONE);
+            weapon.texture.renderF(position.x(), position.y() - weapon.offset.y() + weapon.direction, &weapon.spritesheet_clip, 90.f, NULL, SDL_FLIP_NONE);
         }
         else
         {
-            texture.renderF(position.x() - offset.x(), position.y() - offset.y() + direction + 1, &spritesheet_clip, -90.f, NULL, SDL_FLIP_NONE);
+            weapon.texture.renderF(position.x() - weapon.offset.x(), position.y() - weapon.offset.y() + weapon.direction + 1, &weapon.spritesheet_clip, -90.f, NULL, SDL_FLIP_NONE);
         }
 
-        current_frame = frame;
+        weapon.current_frame = frame;
     }
     else
     {
-        auto attack = basic_attack_framse[current_attack_frame];
+        auto attack = weapon.basic_attack_framse[weapon.current_attack_frame];
         if (facingRight)
         {
-            texture.renderF(position.x() + attack.attack_offset.x(), position.y() - offset.y() + attack.attack_offset.y(), &spritesheet_clip, attack.angle, NULL, SDL_FLIP_NONE);
+            weapon.texture.renderF(position.x() + attack.attack_offset.x(), position.y() - weapon.offset.y() + attack.attack_offset.y(), &weapon.spritesheet_clip, attack.angle, NULL, SDL_FLIP_NONE);
         }
         else
         {
-            texture.renderF(position.x() - offset.x() - attack.attack_offset.x(), position.y() - offset.y() + attack.attack_offset.y() + 1, &spritesheet_clip, -attack.angle, NULL, SDL_FLIP_NONE);
+            weapon.texture.renderF(position.x() - weapon.offset.x() - attack.attack_offset.x(), position.y() - weapon.offset.y() + attack.attack_offset.y() + 1, &weapon.spritesheet_clip, -attack.angle, NULL, SDL_FLIP_NONE);
         }
     }
 }
 
-Weapon *Weapon::createSword(SDL_Renderer **renderer, Vec2 position, int current_frame)
+Weapon *createSword(SDL_Renderer **renderer, Vec2 position, int current_frame)
 {
-    return new Weapon(renderer, {322, 25, 11, 22}, position, Vec2(11.f, 7.f), current_frame);
+    return NewWeapon(renderer, {322, 25, 11, 22}, position, Vec2(11.f, 7.f), current_frame);
 }
+} // namespace WeaponManager

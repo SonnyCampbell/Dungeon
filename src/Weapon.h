@@ -9,9 +9,8 @@ struct AttackFrame
     Vec2 attack_offset;
 };
 
-class Weapon
+struct Weapon
 {
-private:
     LTexture texture;
     RigidBody rb;
     Vec2 offset;
@@ -31,14 +30,15 @@ private:
          {160.f, Vec2(0, 10)},
          {190.f, Vec2(-10, 10)}};
     float frame_length = 16.6f;
-
-public:
-    Weapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 offset, int current_frame);
-    ~Weapon();
-    RigidBody getRigidBody();
-    void Draw(Vec2 position, int frame, bool facingRight);
-    void ResetFrames();
-    void Attack(AttackTypes attack_type);
-    void Update(double elapsed_game_time);
-    static Weapon *createSword(SDL_Renderer **renderer, Vec2 position, int current_frame);
 };
+
+namespace WeaponManager
+{
+Weapon *NewWeapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 offset, int current_frame);
+void DeleteWeapon(Weapon &weapon);
+void DrawWeapon(Weapon &weapon, Vec2 position, int frame, bool facingRight);
+void ResetFrames(Weapon &weapon);
+void WeaponAttack(Weapon &weapon, AttackTypes attack_type);
+void UpdateWeapon(Weapon &weapon, double elapsed_game_time);
+Weapon *createSword(SDL_Renderer **renderer, Vec2 position, int current_frame);
+}; // namespace WeaponManager
