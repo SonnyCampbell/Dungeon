@@ -186,28 +186,10 @@ CollisionResponse innerCollide(TMXTileLayer &tileLayer, TMXTileSet &tileset, Rig
     auto tileRb = RigidBody(0.f, tile.getCollisionBoundary().w, tile.getCollisionBoundary().h, tileAABB.center, 0.f, Vec2::zero());
     auto collision_contact = AABBvAABB(moveableObject, tileRb, tile.getCollisionDistance(), x, y, tileLayer);
 
-    auto tileWidth = tileAABB.size().x();
-    auto tileHeight = tileAABB.size().y();
-    auto tileType = tile.getTileID();
-
-    SDL_FRect srcrect = {((tileType - 1) % 32) * tileWidth, ((tileType - 1) / 32) * tileHeight, tileWidth, tileHeight}; // TODO Constant 32 = tiles wide/high (2 extra = layer around map?)
-    auto destX = x * tileset.getTileWidth();
-    auto destY = y * tileset.getTileHeight();
-    SDL_FRect debugRect = {destX, destY, tileset.getTileWidth(), tileset.getTileHeight()};
-
     if (collision_contact.first)
     {
-        SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
-        SDL_RenderDrawRectF(renderer, &debugRect);
-        auto bounds = tile.getCollisionBoundary();
-        SDL_FRect collision_rect = {destX + bounds.x, destY + bounds.y, (float)bounds.w, (float)bounds.h};
-        SDL_RenderDrawRectF(renderer, &collision_rect);
-
         return collisionResponse(dt, collision_contact.second);
     }
-
-    SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
-    SDL_RenderDrawRectF(renderer, &debugRect);
 
     return CollisionResponse();
 }
@@ -235,9 +217,30 @@ std::vector<CollisionResponse> collision(TMXTileLayer &tileLayer, TMXTileSet &ti
             continue;
 
         auto collision = innerCollide(tileLayer, tileset, rb, bp_tile.tileAABB, bp_tile.tile, dt, bp_tile.x, bp_tile.y, renderer);
+
+        auto tileWidth = bp_tile.tileAABB.size().x();
+        auto tileHeight = bp_tile.tileAABB.size().y();
+        auto tileType = bp_tile.tile.getTileID();
+
+        SDL_FRect srcrect = {((tileType - 1) % 32) * tileWidth, ((tileType - 1) / 32) * tileHeight, tileWidth, tileHeight}; // TODO Constant 32 = tiles wide/high (2 extra = layer around map?)
+        auto destX = bp_tile.x * tileset.getTileWidth();
+        auto destY = bp_tile.y * tileset.getTileHeight();
+        SDL_FRect debugRect = {destX, destY, tileset.getTileWidth(), tileset.getTileHeight()};
+
         if (collision.collision)
         {
+            SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
+            SDL_RenderDrawRectF(renderer, &debugRect);
+            auto bounds = bp_tile.tile.getCollisionBoundary();
+            SDL_FRect collision_rect = {destX + bounds.x, destY + bounds.y, (float)bounds.w, (float)bounds.h};
+            SDL_RenderDrawRectF(renderer, &collision_rect);
+
             collisionResponses.push_back(collision);
+        }
+        else
+        {
+            SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
+            SDL_RenderDrawRectF(renderer, &debugRect);
         }
     }
 

@@ -20,4 +20,5 @@ void DrawPlayer(Player &player);
 void PlayerHandleInputEvent(const SDL_Event &event, Player &player, float dt);
 void PlayerAttack(Player player, AttackTypes attack_type);
 void UpdatePlayerDirection(Player &player, Vec2 movement_vector);
+void DrawPlayerDebugRect(Player &player);
 } // namespace PlayerManager

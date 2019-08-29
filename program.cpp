@@ -266,8 +266,9 @@ int main(int argc, char *args[])
 
         HandleInput(event, quit);
 
-        Update(currentTick, dt);
         render(gRenderer, gSpriteSheetTexture, loader);
+        Update(currentTick, dt);
+        DrawPlayerDebugRect(player);
 
         //Update screen
         SDL_RenderPresent(gRenderer);

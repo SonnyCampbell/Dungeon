@@ -18,6 +18,7 @@ AnimatedSprite *NewAnimatedSprite(SDL_Renderer **renderer, std::string texturePa
 void DeleteAnimatedSprite(AnimatedSprite &sprite)
 {
     delete sprite.animations;
+    delete &sprite;
 }
 
 Animation *CurrentAnimation(const AnimatedSprite &sprite)

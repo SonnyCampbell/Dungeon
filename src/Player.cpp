@@ -62,13 +62,16 @@ void DrawPlayer(Player &player)
 {
     DrawSprite(*player.sprite, player.rb.aabb.min());
     player.weapon->Draw(player.rb.aabb.center, CurrentAnimation(*player.sprite)->currentFrameCount(), player.sprite->facingRight);
+}
 
+void DrawPlayerDebugRect(Player &player)
+{
     //DEBUG DRAWING
-    // SDL_FRect debug_rect = {rb.aabb.min().x(), rb.aabb.min().y(), (float)sprite->CurrentAnimation()->CurrentFrame().w, (float)sprite->CurrentAnimation()->CurrentFrame().h};
-    // SDL_SetRenderDrawColor(*sprite->texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-    // SDL_RenderDrawRectF(*sprite->texture.gRenderer, &debug_rect);
-    // SDL_SetRenderDrawColor(*sprite->texture.gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-    // SDL_RenderDrawPointF(*sprite->texture.gRenderer, rb.aabb.center.x(), rb.aabb.center.y());
+    SDL_FRect debug_rect = {player.rb.aabb.min().x(), player.rb.aabb.min().y(), (float)CurrentAnimation(*player.sprite)->CurrentFrame().w, (float)CurrentAnimation(*player.sprite)->CurrentFrame().h};
+    SDL_SetRenderDrawColor(*player.sprite->texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+    SDL_RenderDrawRectF(*player.sprite->texture.gRenderer, &debug_rect);
+    SDL_SetRenderDrawColor(*player.sprite->texture.gRenderer, 0xFF, 0x00, 0x00, 0xFF);
+    SDL_RenderDrawPointF(*player.sprite->texture.gRenderer, player.rb.aabb.center.x(), player.rb.aabb.center.y());
 }
 
 void PlayerHandleInputEvent(const SDL_Event &event, Player &player, float dt)
