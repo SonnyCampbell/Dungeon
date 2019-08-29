@@ -266,7 +266,7 @@ int main(int argc, char *args[])
 
         HandleInput(event, quit);
 
-        //Update(currentTick, dt);
+        Update(currentTick, dt);
         render(gRenderer, gSpriteSheetTexture, loader);
 
         DrawPlayerDebugRect(player);
