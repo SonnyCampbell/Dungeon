@@ -6,14 +6,14 @@ namespace WeaponManager
 Weapon *NewWeapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 offset, int current_frame_count)
 {
     //Don't load this from file every time - copy existing spritesheet texture
-    auto texture = LTexture(renderer);
-    if (!texture.loadFromFile("assets/DungeonTilesetV2.png"))
+    auto texture = new LTexture(renderer);
+    if (!texture->loadFromFile("assets/DungeonTilesetV2.png"))
     {
         printf("fuck");
     }
     auto rb = RigidBody(0.f, clip.w, clip.h, position, 0.f, Vec2::zero());
 
-    return new Weapon{texture, rb, offset, clip, current_frame_count};
+    return new Weapon{*texture, rb, offset, clip, current_frame_count};
 }
 
 void DeleteWeapon()

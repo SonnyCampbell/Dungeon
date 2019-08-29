@@ -6,13 +6,13 @@ namespace AnimatedSpriteManager
 
 AnimatedSprite *NewAnimatedSprite(SDL_Renderer **renderer, std::string texturePath, std::map<AnimationKey, Animation *> *animations, AnimationKey animationKey)
 {
-    auto texture = LTexture(renderer);
-    if (!texture.loadFromFile(texturePath))
+    auto texture = new LTexture(renderer);
+    if (!texture->loadFromFile(texturePath))
     {
         printf("fuck");
     }
 
-    return new AnimatedSprite{texture, animations, animationKey, true, true};
+    return new AnimatedSprite{*texture, animations, animationKey, true, true};
 }
 
 void DeleteAnimatedSprite(AnimatedSprite &sprite)
