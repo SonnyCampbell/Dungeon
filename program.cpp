@@ -16,6 +16,9 @@ using namespace PlayerManager;
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
+const int LEVEL_WIDTH = 720;
+const int LEVEL_HEIGHT = 720;
+
 double lastTick = 0;
 double currentTick = 0;
 float dt = 0.0f;
@@ -33,6 +36,9 @@ LTexture gSpriteSheetTexture(&gRenderer);
 
 //The surface contained by the window
 SDL_Surface *gScreenSurface = NULL;
+
+//The camera area
+SDL_Rect camera = {100, 100, SCREEN_WIDTH, SCREEN_HEIGHT};
 
 Player player = {};
 
@@ -154,8 +160,8 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
                 if (tileID > 0)
                 {
                     SDL_Rect srcrect = {((tileID - 1) % 32) * tileWidth, ((tileID - 1) / 32) * tileHeight, tileWidth, tileHeight}; // TODO Constant 32 = tiles wide/high (2 extra = layer around map?)
-                    auto destX = i * tileWidth;
-                    auto destY = j * tileHeight;
+                    auto destX = i * tileWidth - camera.x;
+                    auto destY = j * tileHeight - camera.y;
                     texture.render(destX, destY, &srcrect);
 
                     //DEBUG DRAWING
@@ -170,7 +176,7 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
         }
     }
 
-    DrawPlayer(player);
+    DrawPlayer(player, Vec2(camera.x, camera.y));
 }
 
 void Update(double currentTick, float dt)
@@ -210,6 +216,30 @@ void Update(double currentTick, float dt)
     Vec2 currentDirection = Vec2(player.rb.direction.x(), player.rb.direction.y());
     currentDirection.normalize();
     player.rb.aabb.center = player.rb.aabb.center + (currentDirection * player.rb.speed * dt);
+
+    //Center the camera over the dot
+    camera.x = (player.rb.aabb.center.x()) - SCREEN_WIDTH / 2;
+    camera.y = (player.rb.aabb.center.y()) - SCREEN_HEIGHT / 2;
+
+    //Keep the camera in bounds
+    if (camera.x < 0)
+    {
+        camera.x = 0;
+    }
+    if (camera.y < 0)
+    {
+        camera.y = 0;
+    }
+    if (camera.x > camera.w)
+    {
+        camera.x = camera.w;
+    }
+    if (camera.y > camera.h)
+    {
+        camera.y = camera.h;
+    }
+
+    printf("Camera: %i %i \n", camera.x, camera.y);
 }
 
 void HandleInput(SDL_Event &event, bool &quit)

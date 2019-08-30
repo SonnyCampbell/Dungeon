@@ -41,4 +41,6 @@ void ResetFrames(Weapon &weapon);
 void WeaponAttack(Weapon &weapon, AttackTypes attack_type);
 void UpdateWeapon(Weapon &weapon, double elapsed_game_time);
 Weapon *createSword(SDL_Renderer **renderer, Vec2 position, int current_frame);
+Weapon *createNailBoard(SDL_Renderer **renderer, Vec2 position, int current_frame);
+Weapon *createHeavyMace(SDL_Renderer **renderer, Vec2 position, int current_frame);
 }; // namespace WeaponManager

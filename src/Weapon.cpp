@@ -95,4 +95,14 @@ Weapon *createSword(SDL_Renderer **renderer, Vec2 position, int current_frame)
 {
     return NewWeapon(renderer, {322, 25, 11, 22}, position, Vec2(11.f, 7.f), current_frame);
 }
+
+Weapon *createNailBoard(SDL_Renderer **renderer, Vec2 position, int current_frame)
+{
+    return NewWeapon(renderer, {322, 56, 11, 22}, position, Vec2(11.f, 7.f), current_frame);
+}
+
+Weapon *createHeavyMace(SDL_Renderer **renderer, Vec2 position, int current_frame)
+{
+    return NewWeapon(renderer, {338, 54, 11, 26}, position, Vec2(11.f, 7.f), current_frame);
+}
 } // namespace WeaponManager

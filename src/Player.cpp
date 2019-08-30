@@ -25,7 +25,7 @@ Player NewPlayer(SDL_Renderer **renderer, Vec2 position, float speed)
 
     auto sprite = NewAnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, WalkUp);
 
-    auto weapon = createSword(renderer, rb.aabb.center, 0);
+    auto weapon = createHeavyMace(renderer, rb.aabb.center, 0);
 
     Player player = {sprite, rb, weapon};
 
@@ -62,9 +62,9 @@ void UpdatePlayer(Player &player, double currentTick, float dt)
     }
 }
 
-void DrawPlayer(Player &player)
+void DrawPlayer(Player &player, Vec2 camera_position)
 {
-    DrawSprite(*player.sprite, player.rb.aabb.min());
+    DrawSprite(*player.sprite, player.rb.aabb.min() - camera_position);
     if (player.weapon)
         DrawWeapon(*player.weapon, player.rb.aabb.center, CurrentAnimation(*player.sprite)->currentFrameCount(), player.sprite->facingRight);
 }
