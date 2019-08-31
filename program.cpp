@@ -14,14 +14,6 @@
 
 using namespace PlayerManager;
 
-const int SCREEN_WIDTH = 400;
-const int SCREEN_HEIGHT = 400;
-
-const float RENDER_SCALE = 1.5;
-
-const int LEVEL_WIDTH = 480 * RENDER_SCALE;
-const int LEVEL_HEIGHT = 480 * RENDER_SCALE;
-
 double lastTick = 0;
 double currentTick = 0;
 float dt = 0.0f;
@@ -40,9 +32,6 @@ LTexture gSpriteSheetTexture(&gRenderer);
 //The surface contained by the window
 SDL_Surface *gScreenSurface = NULL;
 
-//The camera area
-SDL_Rect Game::camera = SDL_Rect{100, 100, SCREEN_WIDTH, SCREEN_HEIGHT};
-
 Player player = {};
 
 bool init()
@@ -56,7 +45,7 @@ bool init()
     }
 
     //The window we'll be rendering to
-    gWindow = SDL_CreateWindow("SDL2 Pixel Drawing", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    gWindow = SDL_CreateWindow("SDL2 Pixel Drawing", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, Game::screen_width, Game::screen_height, 0);
     if (gWindow == NULL)
     {
         printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
@@ -73,7 +62,7 @@ bool init()
 
     //Initialize renderer color
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    SDL_RenderSetScale(gRenderer, RENDER_SCALE, RENDER_SCALE);
+    SDL_RenderSetScale(gRenderer, Game::render_scale, Game::render_scale);
 
     //Initialize PNG loading
     int imgFlags = IMG_INIT_PNG;
@@ -213,7 +202,7 @@ void Update(double currentTick, float dt)
         auto collision_corrected_direction = Vec2(currentDirection.x() - (currentDirection.x() * collision_vector.x()), currentDirection.y() - (currentDirection.y() * collision_vector.y()));
         player.rb.aabb.center = player.rb.aabb.center + (collision_corrected_direction * player.rb.speed * dt);
 
-        Game::UpdateCamera(player.rb.aabb.center, SCREEN_WIDTH, SCREEN_HEIGHT, LEVEL_WIDTH, LEVEL_HEIGHT);
+        Game::UpdateCamera(player.rb.aabb.center);
 
         return;
     }
@@ -222,9 +211,7 @@ void Update(double currentTick, float dt)
     currentDirection.normalize();
     player.rb.aabb.center = player.rb.aabb.center + (currentDirection * player.rb.speed * dt);
 
-    Game::UpdateCamera(player.rb.aabb.center, SCREEN_WIDTH, SCREEN_HEIGHT, LEVEL_WIDTH, LEVEL_HEIGHT);
-
-    printf("Camera: %i %i \n", Game::camera.x, Game::camera.y);
+    Game::UpdateCamera(player.rb.aabb.center);
 }
 
 void HandleInput(SDL_Event &event, bool &quit)

@@ -1,9 +1,20 @@
+#pragma once
+
 #include "SDL.h"
 #include "../Vec2.h"
 
-namespace Game
+class Game
 {
-extern SDL_Rect camera;
+private:
+public:
+    static SDL_Rect camera;
+    static int screen_width;
+    static int screen_height;
 
-void UpdateCamera(Vec2 player_position, int screen_width, int screen_height, int level_width, int level_height);
-} // namespace Game
+    static float render_scale;
+
+    static int level_width;
+    static int level_height;
+
+    static void UpdateCamera(Vec2 player_position);
+};
