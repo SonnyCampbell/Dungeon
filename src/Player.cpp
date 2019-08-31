@@ -62,21 +62,22 @@ void UpdatePlayer(Player &player, double currentTick, float dt)
     }
 }
 
-void DrawPlayer(Player &player, Vec2 camera_position)
+void DrawPlayer(Player &player, SDL_Rect &camera)
 {
+    auto camera_position = Vec2(camera.x, camera.y);
     DrawSprite(*player.sprite, player.rb.aabb.min() - camera_position);
     if (player.weapon)
-        DrawWeapon(*player.weapon, player.rb.aabb.center, CurrentAnimation(*player.sprite)->currentFrameCount(), player.sprite->facingRight);
+        DrawWeapon(*player.weapon, player.rb.aabb.center - camera_position, CurrentAnimation(*player.sprite)->currentFrameCount(), player.sprite->facingRight);
 }
 
-void DrawPlayerDebugRect(Player &player)
+void DrawPlayerDebugRect(Player &player, SDL_Rect &camera)
 {
     //DEBUG DRAWING
-    SDL_FRect debug_rect = {player.rb.aabb.min().x(), player.rb.aabb.min().y(), (float)CurrentAnimation(*player.sprite)->CurrentFrame().w, (float)CurrentAnimation(*player.sprite)->CurrentFrame().h};
+    SDL_FRect debug_rect = {player.rb.aabb.min().x() - camera.x, player.rb.aabb.min().y() - camera.y, (float)CurrentAnimation(*player.sprite)->CurrentFrame().w, (float)CurrentAnimation(*player.sprite)->CurrentFrame().h};
     SDL_SetRenderDrawColor(*player.sprite->texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
     SDL_RenderDrawRectF(*player.sprite->texture.gRenderer, &debug_rect);
     SDL_SetRenderDrawColor(*player.sprite->texture.gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-    SDL_RenderDrawPointF(*player.sprite->texture.gRenderer, player.rb.aabb.center.x(), player.rb.aabb.center.y());
+    SDL_RenderDrawPointF(*player.sprite->texture.gRenderer, player.rb.aabb.center.x() - camera.x, player.rb.aabb.center.y() - camera.y);
 }
 
 void PlayerHandleInputEvent(const SDL_Event &event, Player &player, float dt)

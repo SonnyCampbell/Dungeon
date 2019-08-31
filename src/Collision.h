@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 
+#include "Game Components/Game.h"
 #include "TMXLoader/TMXTileSet.h"
 #include "TMXLoader/TMXTileLayer.h"
 
@@ -225,14 +226,14 @@ std::vector<CollisionResponse> collision(TMXTileLayer &tileLayer, TMXTileSet &ti
         SDL_FRect srcrect = {((tileType - 1) % 32) * tileWidth, ((tileType - 1) / 32) * tileHeight, tileWidth, tileHeight}; // TODO Constant 32 = tiles wide/high (2 extra = layer around map?)
         auto destX = bp_tile.x * tileset.getTileWidth();
         auto destY = bp_tile.y * tileset.getTileHeight();
-        SDL_FRect debugRect = {destX, destY, tileset.getTileWidth(), tileset.getTileHeight()};
+        SDL_FRect debugRect = {(float)destX - Game::camera.x, (float)destY - Game::camera.y, (float)tileset.getTileWidth(), (float)tileset.getTileHeight()};
 
         if (collision.collision)
         {
             SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
             SDL_RenderDrawRectF(renderer, &debugRect);
             auto bounds = bp_tile.tile.getCollisionBoundary();
-            SDL_FRect collision_rect = {destX + bounds.x, destY + bounds.y, (float)bounds.w, (float)bounds.h};
+            SDL_FRect collision_rect = {(float)destX + bounds.x - Game::camera.x, (float)destY + bounds.y - Game::camera.y, (float)bounds.w, (float)bounds.h};
             SDL_RenderDrawRectF(renderer, &collision_rect);
 
             collisionResponses.push_back(collision);

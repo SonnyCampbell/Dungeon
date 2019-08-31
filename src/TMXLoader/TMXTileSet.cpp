@@ -79,12 +79,12 @@ unsigned int TMXTileSet::getImageHeight()
 	return m_imageHeight;
 }
 
-unsigned int TMXTileSet::getTileWidth()
+int TMXTileSet::getTileWidth()
 {
 	return m_tileWidth;
 }
 
-unsigned int TMXTileSet::getTileHeight()
+int TMXTileSet::getTileHeight()
 {
 	return m_tileHeight;
 }

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 
+#include "src/Game Components/Game.h"
 #include "src/LTexture.h"
 #include "src/AnimatedSprite.h"
 #include "src/AnimationKey.h"
@@ -13,11 +14,13 @@
 
 using namespace PlayerManager;
 
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 600;
+const int SCREEN_WIDTH = 400;
+const int SCREEN_HEIGHT = 400;
 
-const int LEVEL_WIDTH = 720;
-const int LEVEL_HEIGHT = 720;
+const float RENDER_SCALE = 1.5;
+
+const int LEVEL_WIDTH = 480 * RENDER_SCALE;
+const int LEVEL_HEIGHT = 480 * RENDER_SCALE;
 
 double lastTick = 0;
 double currentTick = 0;
@@ -38,7 +41,7 @@ LTexture gSpriteSheetTexture(&gRenderer);
 SDL_Surface *gScreenSurface = NULL;
 
 //The camera area
-SDL_Rect camera = {100, 100, SCREEN_WIDTH, SCREEN_HEIGHT};
+SDL_Rect Game::camera = SDL_Rect{100, 100, SCREEN_WIDTH, SCREEN_HEIGHT};
 
 Player player = {};
 
@@ -70,7 +73,7 @@ bool init()
 
     //Initialize renderer color
     SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    SDL_RenderSetScale(gRenderer, 1.5, 1.5);
+    SDL_RenderSetScale(gRenderer, RENDER_SCALE, RENDER_SCALE);
 
     //Initialize PNG loading
     int imgFlags = IMG_INIT_PNG;
@@ -159,9 +162,9 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
                 // only render if it is an actual tile (tileID = 0 means no tile / don't render anycollision_corrected_direction here)
                 if (tileID > 0)
                 {
-                    SDL_Rect srcrect = {((tileID - 1) % 32) * tileWidth, ((tileID - 1) / 32) * tileHeight, tileWidth, tileHeight}; // TODO Constant 32 = tiles wide/high (2 extra = layer around map?)
-                    auto destX = i * tileWidth - camera.x;
-                    auto destY = j * tileHeight - camera.y;
+                    SDL_Rect srcrect = {(int)((tileID - 1) % 32) * tileWidth, (int)((tileID - 1) / 32) * tileHeight, tileWidth, tileHeight}; // TODO Constant 32 = tiles wide/high (2 extra = layer around map?)
+                    auto destX = i * tileWidth - Game::camera.x;
+                    auto destY = j * tileHeight - Game::camera.y;
                     texture.render(destX, destY, &srcrect);
 
                     //DEBUG DRAWING
@@ -176,7 +179,7 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
         }
     }
 
-    DrawPlayer(player, Vec2(camera.x, camera.y));
+    DrawPlayer(player, Game::camera);
 }
 
 void Update(double currentTick, float dt)
@@ -210,6 +213,8 @@ void Update(double currentTick, float dt)
         auto collision_corrected_direction = Vec2(currentDirection.x() - (currentDirection.x() * collision_vector.x()), currentDirection.y() - (currentDirection.y() * collision_vector.y()));
         player.rb.aabb.center = player.rb.aabb.center + (collision_corrected_direction * player.rb.speed * dt);
 
+        Game::UpdateCamera(player.rb.aabb.center, SCREEN_WIDTH, SCREEN_HEIGHT, LEVEL_WIDTH, LEVEL_HEIGHT);
+
         return;
     }
 
@@ -217,29 +222,9 @@ void Update(double currentTick, float dt)
     currentDirection.normalize();
     player.rb.aabb.center = player.rb.aabb.center + (currentDirection * player.rb.speed * dt);
 
-    //Center the camera over the dot
-    camera.x = (player.rb.aabb.center.x()) - SCREEN_WIDTH / 2;
-    camera.y = (player.rb.aabb.center.y()) - SCREEN_HEIGHT / 2;
+    Game::UpdateCamera(player.rb.aabb.center, SCREEN_WIDTH, SCREEN_HEIGHT, LEVEL_WIDTH, LEVEL_HEIGHT);
 
-    //Keep the camera in bounds
-    if (camera.x < 0)
-    {
-        camera.x = 0;
-    }
-    if (camera.y < 0)
-    {
-        camera.y = 0;
-    }
-    if (camera.x > camera.w)
-    {
-        camera.x = camera.w;
-    }
-    if (camera.y > camera.h)
-    {
-        camera.y = camera.h;
-    }
-
-    printf("Camera: %i %i \n", camera.x, camera.y);
+    printf("Camera: %i %i \n", Game::camera.x, Game::camera.y);
 }
 
 void HandleInput(SDL_Event &event, bool &quit)
@@ -299,7 +284,7 @@ int main(int argc, char *args[])
         Update(currentTick, dt);
         render(gRenderer, gSpriteSheetTexture, loader);
 
-        DrawPlayerDebugRect(player);
+        DrawPlayerDebugRect(player, Game::camera);
 
         //Update screen
         SDL_RenderPresent(gRenderer);

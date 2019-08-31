@@ -42,8 +42,8 @@ public:
 	unsigned int getLastGID();
 	unsigned int getImageWidth();
 	unsigned int getImageHeight();
-	unsigned int getTileWidth();
-	unsigned int getTileHeight();
+	int getTileWidth();
+	int getTileHeight();
 	unsigned int getSpacing();
 	unsigned int getMargin();
 	unsigned int getOffsetX();
@@ -65,8 +65,8 @@ private:
 	unsigned int m_lastGID;
 	unsigned int m_imageWidth;
 	unsigned int m_imageHeight;
-	unsigned int m_tileWidth;
-	unsigned int m_tileHeight;
+	int m_tileWidth;
+	int m_tileHeight;
 	unsigned int m_spacing;
 	unsigned int m_margin;
 	unsigned int m_offsetX;
