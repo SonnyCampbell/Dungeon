@@ -4,15 +4,17 @@
 #include <iostream>
 #include <fstream>
 
-#include "src/Game Components/Game.h"
-#include "src/LTexture.h"
-#include "src/AnimatedSprite.h"
-#include "src/AnimationKey.h"
-#include "src/Player.h"
-#include "src/TMXLoader/TMXLoader.h"
-#include "src/Collision.h"
+#include "Game Components/Game.h"
+#include "LTexture.h"
+#include "AnimatedSprite.h"
+#include "AnimationKey.h"
+#include "Player.h"
+#include "Enemy.h"
+#include "TMXLoader/TMXLoader.h"
+#include "Collision.h"
 
 using namespace PlayerManager;
+using namespace EnemyManager;
 
 double lastTick = 0;
 double currentTick = 0;
@@ -253,6 +255,7 @@ int main(int argc, char *args[])
     }
 
     player = NewPlayer(&gRenderer, {100, 100});
+    auto enemy = NewEnemy1(&gRenderer, {150, 150});
 
     int totalFrames = 0;
     bool quit = false;
@@ -272,6 +275,8 @@ int main(int argc, char *args[])
         render(gRenderer, gSpriteSheetTexture, loader);
 
         DrawPlayerDebugRect(player, Game::camera);
+
+        DrawEnemy(enemy);
 
         //Update screen
         SDL_RenderPresent(gRenderer);
