@@ -176,7 +176,6 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
 void Update(double currentTick, float dt)
 {
     UpdatePlayer(player, currentTick, dt);
-    printf("DIrection %f %f \n", player.rb.direction.x(), player.rb.direction.y());
     auto collision_layer = map1->getTileLayers()->at(2);
     auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player.rb, dt, gRenderer);
 
@@ -272,6 +271,14 @@ int main(int argc, char *args[])
         HandleInput(event, quit);
 
         Update(currentTick, dt);
+        UpdateEnemy(enemy, currentTick, dt);
+
+        // auto hit = Collision::checkBoxCollision(player.weapon, enemy.rb);
+        // if (hit.first)
+        // {
+        //     printf("Hit \n");
+        // }
+
         render(gRenderer, gSpriteSheetTexture, loader);
 
         DrawPlayerDebugRect(player, Game::camera);

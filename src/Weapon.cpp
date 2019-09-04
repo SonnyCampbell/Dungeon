@@ -36,9 +36,14 @@ void WeaponAttack(Weapon &weapon, AttackTypes new_attack_type)
     }
 }
 
-void UpdateWeapon(Weapon &weapon, double elapsed_game_time)
+void UpdateWeapon(Weapon &weapon, Vec2 center, double elapsed_game_time)
 {
-    if (weapon.isAttacking)
+    if (!weapon.isAttacking)
+    {
+        weapon.rb.aabb = AABB{center, Vec2(weapon.spritesheet_clip.w / 2.f, weapon.spritesheet_clip.w / 2.f)};
+        //weapon.collision_box =
+    }
+    else
     {
         if (elapsed_game_time - weapon.last_frame_time > weapon.frame_length)
         {
@@ -57,8 +62,9 @@ void UpdateWeapon(Weapon &weapon, double elapsed_game_time)
     }
 }
 
-void DrawWeapon(Weapon &weapon, Vec2 position, int frame, bool facingRight)
+Vec2 GetWeaponPosition(Weapon &weapon, Vec2 camera_position, int frame, bool facingRight)
 {
+    auto position = weapon.rb.aabb.center - camera_position;
     if (!weapon.isAttacking)
     {
         if (weapon.current_frame != frame)
@@ -68,11 +74,40 @@ void DrawWeapon(Weapon &weapon, Vec2 position, int frame, bool facingRight)
 
         if (facingRight)
         {
-            weapon.texture.renderF(position.x(), position.y() - weapon.offset.y() + weapon.direction, &weapon.spritesheet_clip, 90.f, NULL, SDL_FLIP_NONE);
+            return Vec2(position.x(), position.y() - weapon.offset.y() + weapon.direction);
         }
         else
         {
-            weapon.texture.renderF(position.x() - weapon.offset.x(), position.y() - weapon.offset.y() + weapon.direction + 1, &weapon.spritesheet_clip, -90.f, NULL, SDL_FLIP_NONE);
+            return Vec2(position.x() - weapon.offset.x(), position.y() - weapon.offset.y() + weapon.direction + 1);
+        }
+    }
+    else
+    {
+        auto attack = weapon.basic_attack_framse[weapon.current_attack_frame];
+        if (facingRight)
+        {
+            return Vec2(position.x() + attack.attack_offset.x(), position.y() - weapon.offset.y() + attack.attack_offset.y());
+        }
+        else
+        {
+            return Vec2(position.x() - weapon.offset.x() - attack.attack_offset.x(), position.y() - weapon.offset.y() + attack.attack_offset.y() + 1);
+        }
+    }
+}
+
+void DrawWeapon(Weapon &weapon, Vec2 camera_position, int frame, bool facingRight)
+{
+    auto position = GetWeaponPosition(weapon, camera_position, frame, facingRight);
+    if (!weapon.isAttacking)
+    {
+
+        if (facingRight)
+        {
+            weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, 90.f, NULL, SDL_FLIP_NONE);
+        }
+        else
+        {
+            weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, -90.f, NULL, SDL_FLIP_NONE);
         }
 
         weapon.current_frame = frame;
@@ -82,13 +117,30 @@ void DrawWeapon(Weapon &weapon, Vec2 position, int frame, bool facingRight)
         auto attack = weapon.basic_attack_framse[weapon.current_attack_frame];
         if (facingRight)
         {
-            weapon.texture.renderF(position.x() + attack.attack_offset.x(), position.y() - weapon.offset.y() + attack.attack_offset.y(), &weapon.spritesheet_clip, attack.angle, NULL, SDL_FLIP_NONE);
+            weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, attack.angle, NULL, SDL_FLIP_NONE);
         }
         else
         {
-            weapon.texture.renderF(position.x() - weapon.offset.x() - attack.attack_offset.x(), position.y() - weapon.offset.y() + attack.attack_offset.y() + 1, &weapon.spritesheet_clip, -attack.angle, NULL, SDL_FLIP_NONE);
+            weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, -attack.angle, NULL, SDL_FLIP_NONE);
         }
     }
+
+    // #define PI 3.14159265
+    //     auto pivot_point = weapon.rb.aabb.center;
+    //     auto tranlate = position - pivot_point;
+    //     auto x_new = cos(90 * PI / 180) * tranlate.x() - sin(90 * PI / 180) * tranlate.y();
+    //     auto y_new = sin(90 * PI / 180) * tranlate.x() + cos(90 * PI / 180) * tranlate.y();
+    //     Vec2 new_point = {(float)x_new + pivot_point.x(), (float)y_new + pivot_point.y()};
+
+    //     // DEBUG DRAWING
+    //     //DUMB - Rotate around point, not around origin
+
+    //     auto x = cos(90 * PI / 180) * position.x() - sin(90 * PI / 180) * position.y();
+    //     auto y = sin(90 * PI / 180) * position.x() + cos(90 * PI / 180) * position.y();
+    //     SDL_FRect debug_rect = {new_point.x(), new_point.y(), (float)weapon.spritesheet_clip.h, (float)weapon.spritesheet_clip.w};
+    //     SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+    //     SDL_RenderDrawRectF(*weapon.texture.gRenderer, &debug_rect);
+    //     SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0xFF, 0x00, 0x00, 0xFF);
 }
 
 Weapon *createSword(SDL_Renderer **renderer, Vec2 position, int current_frame)

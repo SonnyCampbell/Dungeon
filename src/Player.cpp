@@ -58,7 +58,7 @@ void UpdatePlayer(Player &player, double currentTick, float dt)
     UpdateAnimation(*player.sprite, player.sprite->currentAnimationKey, currentTick);
     if (player.weapon)
     {
-        UpdateWeapon(*player.weapon, currentTick);
+        UpdateWeapon(*player.weapon, player.rb.aabb.center, currentTick);
     }
 }
 
@@ -67,7 +67,7 @@ void DrawPlayer(Player &player, SDL_Rect &camera)
     auto camera_position = Vec2(camera.x, camera.y);
     DrawSprite(*player.sprite, player.rb.aabb.min() - camera_position);
     if (player.weapon)
-        DrawWeapon(*player.weapon, player.rb.aabb.center - camera_position, CurrentAnimation(*player.sprite)->currentFrameCount(), player.sprite->facingRight);
+        DrawWeapon(*player.weapon, camera_position, CurrentAnimation(*player.sprite)->currentFrameCount(), player.sprite->facingRight);
 }
 
 void DrawPlayerDebugRect(Player &player, SDL_Rect &camera)
@@ -77,7 +77,6 @@ void DrawPlayerDebugRect(Player &player, SDL_Rect &camera)
     SDL_SetRenderDrawColor(*player.sprite->texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
     SDL_RenderDrawRectF(*player.sprite->texture.gRenderer, &debug_rect);
     SDL_SetRenderDrawColor(*player.sprite->texture.gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-    SDL_RenderDrawPointF(*player.sprite->texture.gRenderer, player.rb.aabb.center.x() - camera.x, player.rb.aabb.center.y() - camera.y);
 }
 
 void PlayerHandleInputEvent(const SDL_Event &event, Player &player, float dt)

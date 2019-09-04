@@ -2,6 +2,7 @@
 #include "RigidBody.h"
 #include "AnimatedSprite.h"
 #include "AttackTypes.h"
+#include "math.h"
 
 struct AttackFrame
 {
@@ -15,6 +16,7 @@ struct Weapon
     RigidBody rb;
     Vec2 offset;
     SDL_Rect spritesheet_clip;
+    SDL_Rect collision_box;
     int total_current_frame = 4;
     int current_frame = 0;
     int direction = 0;
@@ -29,7 +31,7 @@ struct Weapon
          {120.f, Vec2(7, 7)},
          {160.f, Vec2(0, 10)},
          {190.f, Vec2(-10, 10)}};
-    float frame_length = 16.6f;
+    float frame_length = 1006.6f; //TODO Attack Speed
 };
 
 namespace WeaponManager
@@ -39,7 +41,7 @@ void DeleteWeapon(Weapon &weapon);
 void DrawWeapon(Weapon &weapon, Vec2 position, int frame, bool facingRight);
 void ResetFrames(Weapon &weapon);
 void WeaponAttack(Weapon &weapon, AttackTypes attack_type);
-void UpdateWeapon(Weapon &weapon, double elapsed_game_time);
+void UpdateWeapon(Weapon &weapon, Vec2 center, double elapsed_game_time);
 Weapon *createSword(SDL_Renderer **renderer, Vec2 position, int current_frame);
 Weapon *createNailBoard(SDL_Renderer **renderer, Vec2 position, int current_frame);
 Weapon *createHeavyMace(SDL_Renderer **renderer, Vec2 position, int current_frame);
