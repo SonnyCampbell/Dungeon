@@ -39,6 +39,7 @@ public:
 
     SDL_Rect CurrentFrame()
     {
+        // Prevent out of bounds errors
         if (current_frame >= framesCount)
         {
             return {0, 0, 0, 0};

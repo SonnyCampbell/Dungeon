@@ -12,6 +12,7 @@
 #include "Enemy.h"
 #include "TMXLoader/TMXLoader.h"
 #include "Collision.h"
+#include "QuadTree.h"
 
 using namespace PlayerManager;
 using namespace EnemyManager;
@@ -254,7 +255,9 @@ int main(int argc, char *args[])
     }
 
     player = NewPlayer(&gRenderer, {100, 100});
-    auto enemy = NewEnemy1(&gRenderer, {150, 150});
+    auto enemy = NewEnemy1(&gRenderer, {120, 120});
+
+    QuadTree *quad = new QuadTree(0, {0, 0, 900, 900});
 
     int totalFrames = 0;
     bool quit = false;
@@ -284,6 +287,10 @@ int main(int argc, char *args[])
         DrawPlayerDebugRect(player, Game::camera);
 
         DrawEnemy(enemy);
+
+        quad->clear();
+        quad->insert({(int)player.rb.aabb.min().x(), (int)player.rb.aabb.min().y(), (int)player.rb.aabb.halfExtents.x() * 2, (int)player.rb.aabb.halfExtents.y() * 2});
+        quad->insert({(int)enemy.rb.aabb.min().x(), (int)enemy.rb.aabb.min().y(), (int)enemy.rb.aabb.halfExtents.x() * 2, (int)enemy.rb.aabb.halfExtents.y() * 2});
 
         //Update screen
         SDL_RenderPresent(gRenderer);
