@@ -111,6 +111,13 @@ void DrawWeapon(Weapon &weapon, Vec2 camera_position, int frame, bool facingRigh
         }
 
         weapon.current_frame = frame;
+
+        Vec2 collision_offset = {7, 8};
+        SDL_FRect collision_box = {position.x() + collision_offset.x(), position.y() + collision_offset.y(), 11, 11};
+        SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+        SDL_RenderDrawRectF(*weapon.texture.gRenderer, &collision_box);
+        SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0xFF, 0x00, 0xFF);
+        SDL_RenderDrawPointF(*weapon.texture.gRenderer, position.x(), position.y());
     }
     else
     {
@@ -123,6 +130,12 @@ void DrawWeapon(Weapon &weapon, Vec2 camera_position, int frame, bool facingRigh
         {
             weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, -attack.angle, NULL, SDL_FLIP_NONE);
         }
+
+        SDL_FRect collision_box = {position.x() + attack.attack_collision_offset.x(), position.y() + attack.attack_collision_offset.y(), 11, 11};
+        SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+        SDL_RenderDrawRectF(*weapon.texture.gRenderer, &collision_box);
+        SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0xFF, 0x00, 0xFF);
+        SDL_RenderDrawPointF(*weapon.texture.gRenderer, position.x(), position.y());
     }
 
     // #define PI 3.14159265

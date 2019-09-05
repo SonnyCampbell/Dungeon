@@ -1,5 +1,6 @@
 #include <vector>
 #include "SDL.h"
+#include "Game Components/Game.h"
 
 class QuadTree
 {
@@ -21,6 +22,7 @@ public:
     int getIndex(SDL_Rect rect);
     void insert(SDL_Rect rect);
     std::vector<SDL_Rect> retrieve(std::vector<SDL_Rect> &return_list, SDL_Rect rect);
+    void draw(SDL_Renderer *renderer);
 };
 
 QuadTree::QuadTree(int p_level, SDL_Rect p_bounds)
@@ -163,4 +165,16 @@ std::vector<SDL_Rect> QuadTree::retrieve(std::vector<SDL_Rect> &return_list, SDL
     }
 
     return return_list;
+}
+
+void QuadTree::draw(SDL_Renderer *renderer)
+{
+    for (auto node : nodes)
+    {
+        node.draw(renderer);
+    }
+
+    SDL_Rect debug_rect = {bounds.x - Game::camera.x, bounds.y - Game::camera.y, bounds.w, bounds.h};
+    SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 00, 0xFF);
+    SDL_RenderDrawRect(renderer, &debug_rect);
 }

@@ -8,6 +8,7 @@ struct AttackFrame
 {
     float angle;
     Vec2 attack_offset;
+    Vec2 attack_collision_offset;
 };
 
 struct Weapon
@@ -27,10 +28,10 @@ struct Weapon
     double last_frame_time = 0;
     int current_attack_frame = 0;
     AttackFrame basic_attack_framse[4] =
-        {{20.f, Vec2(0, -8)},
-         {120.f, Vec2(7, 7)},
-         {160.f, Vec2(0, 10)},
-         {190.f, Vec2(-10, 10)}};
+        {{20.f, Vec2(0, -8), Vec2(3.f, 3.f)},
+         {120.f, Vec2(7, 7), Vec2(3.f, 11.f)},
+         {160.f, Vec2(0, 10), Vec2(0.f, 12.f)},
+         {190.f, Vec2(-10, 10), Vec2(-1.f, 12.f)}};
     float frame_length = 1006.6f; //TODO Attack Speed
 };
 

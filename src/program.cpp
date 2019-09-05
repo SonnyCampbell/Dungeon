@@ -255,9 +255,9 @@ int main(int argc, char *args[])
     }
 
     player = NewPlayer(&gRenderer, {100, 100});
-    auto enemy = NewEnemy1(&gRenderer, {120, 120});
+    auto enemy = NewEnemy1(&gRenderer, {100, 180});
 
-    QuadTree *quad = new QuadTree(0, {0, 0, 900, 900});
+    QuadTree *quad = new QuadTree(0, {0, 0, 480, 480});
 
     int totalFrames = 0;
     bool quit = false;
@@ -291,7 +291,7 @@ int main(int argc, char *args[])
         quad->clear();
         quad->insert({(int)player.rb.aabb.min().x(), (int)player.rb.aabb.min().y(), (int)player.rb.aabb.halfExtents.x() * 2, (int)player.rb.aabb.halfExtents.y() * 2});
         quad->insert({(int)enemy.rb.aabb.min().x(), (int)enemy.rb.aabb.min().y(), (int)enemy.rb.aabb.halfExtents.x() * 2, (int)enemy.rb.aabb.halfExtents.y() * 2});
-
+        //quad->draw(gRenderer); Debug Drawing
         //Update screen
         SDL_RenderPresent(gRenderer);
 
