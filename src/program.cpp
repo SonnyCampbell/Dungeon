@@ -276,11 +276,12 @@ int main(int argc, char *args[])
         Update(currentTick, dt);
         UpdateEnemy(enemy, currentTick, dt);
 
-        // auto hit = Collision::checkBoxCollision(player.weapon, enemy.rb);
-        // if (hit.first)
-        // {
-        //     printf("Hit \n");
-        // }
+        auto hit = Collision::checkBoxCollision(player.weapon->collision_box, enemy.rb.aabb.boundingBox());
+        if (hit)
+        {
+            EnemyManager::TakeDamage(enemy, player.weapon->damage);
+            printf("Hit \n");
+        }
 
         render(gRenderer, gSpriteSheetTexture, loader);
 
@@ -289,9 +290,10 @@ int main(int argc, char *args[])
         DrawEnemy(enemy);
 
         quad->clear();
-        quad->insert({(int)player.rb.aabb.min().x(), (int)player.rb.aabb.min().y(), (int)player.rb.aabb.halfExtents.x() * 2, (int)player.rb.aabb.halfExtents.y() * 2});
-        quad->insert({(int)enemy.rb.aabb.min().x(), (int)enemy.rb.aabb.min().y(), (int)enemy.rb.aabb.halfExtents.x() * 2, (int)enemy.rb.aabb.halfExtents.y() * 2});
-        //quad->draw(gRenderer); Debug Drawing
+        quad->insert(player.rb.aabb.boundingBox());
+        quad->insert(enemy.rb.aabb.boundingBox());
+        quad->draw(gRenderer); // Debug Drawing
+
         //Update screen
         SDL_RenderPresent(gRenderer);
 

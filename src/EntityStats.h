@@ -2,6 +2,6 @@
 
 struct EntityStats
 {
-  int Health;
-  float Speed;
+  int health;
+  float speed;
 };

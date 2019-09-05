@@ -19,4 +19,5 @@ namespace EnemyManager
 Enemy NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed = 166.0f);
 void UpdateEnemy(Enemy &enemy, double current_tick, float dt);
 void DrawEnemy(Enemy &enemy);
-}
+void TakeDamage(Enemy &enemy, int damage);
+} // namespace EnemyManager

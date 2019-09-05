@@ -23,9 +23,10 @@ Enemy NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed)
     return enemy;
 }
 
-void TakeDamage(int damage)
+void TakeDamage(Enemy &enemy, int damage)
 {
-    printf("OW! \n");
+    enemy.stats.health -= damage;
+    printf("OW! Health: %i \n", enemy.stats.health);
 }
 
 void UpdateEnemy(Enemy &enemy, double current_tick, float dt)

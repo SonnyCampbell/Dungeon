@@ -3,7 +3,7 @@
 namespace WeaponManager
 {
 
-Weapon *NewWeapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 offset, int current_frame_count)
+Weapon *NewWeapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 offset, int current_frame_count, int damage)
 {
     //Don't load this from file every time - copy existing spritesheet texture
     auto texture = new LTexture(renderer);
@@ -13,7 +13,9 @@ Weapon *NewWeapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 of
     }
     auto rb = RigidBody(0.f, clip.w, clip.h, position, 0.f, Vec2::zero());
 
-    return new Weapon{*texture, rb, offset, clip, current_frame_count};
+    auto weapon = new Weapon{*texture, rb, offset, clip, current_frame_count};
+    weapon->damage = damage;
+    return weapon;
 }
 
 void DeleteWeapon()
@@ -38,27 +40,21 @@ void WeaponAttack(Weapon &weapon, AttackTypes new_attack_type)
 
 void UpdateWeapon(Weapon &weapon, Vec2 center, double elapsed_game_time)
 {
-    if (!weapon.isAttacking)
-    {
-        weapon.rb.aabb = AABB{center, Vec2(weapon.spritesheet_clip.w / 2.f, weapon.spritesheet_clip.w / 2.f)};
-        //weapon.collision_box =
-    }
-    else
-    {
-        if (elapsed_game_time - weapon.last_frame_time > weapon.frame_length)
-        {
 
-            weapon.last_frame_time = elapsed_game_time;
-            auto next_frame = weapon.current_attack_frame + 1;
-            if (next_frame >= 4)
-            {
-                weapon.isAttacking = false;
-                weapon.current_attack_frame = 0;
-                ResetFrames(weapon);
-                return;
-            }
-            weapon.current_attack_frame = (next_frame) % 4;
+    weapon.rb.aabb = AABB{center, Vec2(weapon.spritesheet_clip.w / 2.f, weapon.spritesheet_clip.w / 2.f)};
+    if (elapsed_game_time - weapon.last_frame_time > weapon.frame_length)
+    {
+
+        weapon.last_frame_time = elapsed_game_time;
+        auto next_frame = weapon.current_attack_frame + 1;
+        if (next_frame >= 4)
+        {
+            weapon.isAttacking = false;
+            weapon.current_attack_frame = 0;
+            ResetFrames(weapon);
+            return;
         }
+        weapon.current_attack_frame = (next_frame) % 4;
     }
 }
 
@@ -104,20 +100,27 @@ void DrawWeapon(Weapon &weapon, Vec2 camera_position, int frame, bool facingRigh
         if (facingRight)
         {
             weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, 90.f, NULL, SDL_FLIP_NONE);
+
+            Vec2 collision_offset = {7, 8};
+            weapon.collision_box = {(int)(position.x() + collision_offset.x()), (int)(position.y() + collision_offset.y()), 11, 11};
+            SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+            SDL_RenderDrawRect(*weapon.texture.gRenderer, &weapon.collision_box);
+            SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0xFF, 0x00, 0xFF);
+            SDL_RenderDrawPointF(*weapon.texture.gRenderer, position.x(), position.y());
         }
         else
         {
             weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, -90.f, NULL, SDL_FLIP_NONE);
+
+            Vec2 collision_offset = {7, 8};
+            weapon.collision_box = {(int)(position.x() - weapon.offset.x() + collision_offset.x()), (int)(position.y() + collision_offset.y()), 11, 11};
+            SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+            SDL_RenderDrawRect(*weapon.texture.gRenderer, &weapon.collision_box);
+            SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0xFF, 0x00, 0xFF);
+            SDL_RenderDrawPointF(*weapon.texture.gRenderer, position.x(), position.y());
         }
 
         weapon.current_frame = frame;
-
-        Vec2 collision_offset = {7, 8};
-        SDL_FRect collision_box = {position.x() + collision_offset.x(), position.y() + collision_offset.y(), 11, 11};
-        SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-        SDL_RenderDrawRectF(*weapon.texture.gRenderer, &collision_box);
-        SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0xFF, 0x00, 0xFF);
-        SDL_RenderDrawPointF(*weapon.texture.gRenderer, position.x(), position.y());
     }
     else
     {
@@ -125,17 +128,21 @@ void DrawWeapon(Weapon &weapon, Vec2 camera_position, int frame, bool facingRigh
         if (facingRight)
         {
             weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, attack.angle, NULL, SDL_FLIP_NONE);
+            weapon.collision_box = {(int)(position.x() + attack.attack_collision_offset.x()), (int)(position.y() + attack.attack_collision_offset.y()), 11, 11};
+            SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+            SDL_RenderDrawRect(*weapon.texture.gRenderer, &weapon.collision_box);
+            SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0xFF, 0x00, 0xFF);
+            SDL_RenderDrawPointF(*weapon.texture.gRenderer, position.x(), position.y());
         }
         else
         {
             weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, -attack.angle, NULL, SDL_FLIP_NONE);
+            weapon.collision_box = {(int)(position.x() + attack.attack_collision_offset.x()), (int)(position.y() + attack.attack_collision_offset.y()), 11, 11};
+            SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
+            SDL_RenderDrawRect(*weapon.texture.gRenderer, &weapon.collision_box);
+            SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0xFF, 0x00, 0xFF);
+            SDL_RenderDrawPointF(*weapon.texture.gRenderer, position.x(), position.y());
         }
-
-        SDL_FRect collision_box = {position.x() + attack.attack_collision_offset.x(), position.y() + attack.attack_collision_offset.y(), 11, 11};
-        SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-        SDL_RenderDrawRectF(*weapon.texture.gRenderer, &collision_box);
-        SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0xFF, 0x00, 0xFF);
-        SDL_RenderDrawPointF(*weapon.texture.gRenderer, position.x(), position.y());
     }
 
     // #define PI 3.14159265
@@ -158,16 +165,16 @@ void DrawWeapon(Weapon &weapon, Vec2 camera_position, int frame, bool facingRigh
 
 Weapon *createSword(SDL_Renderer **renderer, Vec2 position, int current_frame)
 {
-    return NewWeapon(renderer, {322, 25, 11, 22}, position, Vec2(11.f, 7.f), current_frame);
+    return NewWeapon(renderer, {322, 25, 11, 22}, position, Vec2(11.f, 7.f), current_frame, 20);
 }
 
 Weapon *createNailBoard(SDL_Renderer **renderer, Vec2 position, int current_frame)
 {
-    return NewWeapon(renderer, {322, 56, 11, 22}, position, Vec2(11.f, 7.f), current_frame);
+    return NewWeapon(renderer, {322, 56, 11, 22}, position, Vec2(11.f, 7.f), current_frame, 15);
 }
 
 Weapon *createHeavyMace(SDL_Renderer **renderer, Vec2 position, int current_frame)
 {
-    return NewWeapon(renderer, {338, 54, 11, 26}, position, Vec2(11.f, 7.f), current_frame);
+    return NewWeapon(renderer, {338, 54, 11, 26}, position, Vec2(11.f, 7.f), current_frame, 30);
 }
 } // namespace WeaponManager

@@ -6,7 +6,7 @@ class QuadTree
 {
 private:
     const int max_objects = 1;
-    const int max_levels = 5;
+    const int max_levels = 3;
 
     int level;
     std::vector<SDL_Rect> objects; //TODO - Some sort of transformation object with entity id
@@ -50,7 +50,7 @@ void QuadTree::clear()
 }
 void QuadTree::split()
 {
-    printf("Splitting quad %i %i %i %i \n", bounds.x, bounds.y, bounds.w, bounds.h);
+    //printf("Splitting quad %i %i %i %i \n", bounds.x, bounds.y, bounds.w, bounds.h);
 
     int sub_width = (int)(bounds.w / 2);
     int sub_height = (int)(bounds.h / 2);

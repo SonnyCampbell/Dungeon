@@ -24,7 +24,8 @@ struct Weapon
 
     bool isAttacking = false;
     AttackTypes attack_type;
-    double attack_time = 500; //ms
+    //double attack_time = 500; //ms
+    int damage;
     double last_frame_time = 0;
     int current_attack_frame = 0;
     AttackFrame basic_attack_framse[4] =
@@ -32,12 +33,12 @@ struct Weapon
          {120.f, Vec2(7, 7), Vec2(3.f, 11.f)},
          {160.f, Vec2(0, 10), Vec2(0.f, 12.f)},
          {190.f, Vec2(-10, 10), Vec2(-1.f, 12.f)}};
-    float frame_length = 1006.6f; //TODO Attack Speed
+    float frame_length = 33.f; //TODO Attack Speed
 };
 
 namespace WeaponManager
 {
-Weapon *NewWeapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 offset, int current_frame);
+Weapon *NewWeapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 offset, int current_frame, int damage);
 void DeleteWeapon(Weapon &weapon);
 void DrawWeapon(Weapon &weapon, Vec2 position, int frame, bool facingRight);
 void ResetFrames(Weapon &weapon);

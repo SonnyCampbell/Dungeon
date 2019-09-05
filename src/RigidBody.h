@@ -1,5 +1,6 @@
 #pragma once
 #include "Vec2.h"
+#include "SDL.h"
 class AABB
 {
 private:
@@ -34,6 +35,11 @@ public:
     Vec2 size()
     {
         return Vec2(halfExtents.x() * 2.f, halfExtents.y() * 2.f);
+    }
+
+    SDL_Rect boundingBox()
+    {
+        return {(int)min().x(), (int)min().y(), (int)halfExtents.x() * 2, (int)halfExtents.y() * 2};
     }
 };
 
