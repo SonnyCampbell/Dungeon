@@ -183,4 +183,5 @@ void QuadTree::draw(SDL_Renderer *renderer)
     SDL_Rect debug_rect = {bounds.x - Game::camera.x, bounds.y - Game::camera.y, bounds.w, bounds.h};
     SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 00, 0xFF);
     SDL_RenderDrawRect(renderer, &debug_rect);
+    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 }

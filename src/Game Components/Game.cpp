@@ -1,5 +1,7 @@
 #include "Game.h"
 
+std::vector<DebugRect> Game::debug_rects = std::vector<DebugRect>();
+
 static int entity_id = 4;
 
 int Game::current_tick = 0;

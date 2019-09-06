@@ -62,21 +62,22 @@ void UpdatePlayer(Player &player)
     }
 }
 
-void DrawPlayer(Player &player, SDL_Rect &camera)
+void DrawPlayer(Player &player)
 {
-    auto camera_position = Vec2(camera.x, camera.y);
+    auto camera_position = Vec2(Game::camera.x, Game::camera.y);
     DrawSprite(*player.sprite, player.rb.aabb.min() - camera_position);
     if (player.weapon)
         DrawWeapon(*player.weapon, camera_position, CurrentAnimation(*player.sprite)->currentFrameCount(), player.sprite->facingRight);
+
+    DrawPlayerDebugRect(player);
 }
 
-void DrawPlayerDebugRect(Player &player, SDL_Rect &camera)
+void DrawPlayerDebugRect(Player &player)
 {
     //DEBUG DRAWING
-    SDL_FRect debug_rect = {player.rb.aabb.min().x() - camera.x, player.rb.aabb.min().y() - camera.y, (float)CurrentAnimation(*player.sprite)->CurrentFrame().w, (float)CurrentAnimation(*player.sprite)->CurrentFrame().h};
-    SDL_SetRenderDrawColor(*player.sprite->texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-    SDL_RenderDrawRectF(*player.sprite->texture.gRenderer, &debug_rect);
-    SDL_SetRenderDrawColor(*player.sprite->texture.gRenderer, 0xFF, 0x00, 0x00, 0xFF);
+    SDL_FRect debug_rect = {player.rb.aabb.min().x() - Game::camera.x, player.rb.aabb.min().y() - Game::camera.y, (float)CurrentAnimation(*player.sprite)->CurrentFrame().w, (float)CurrentAnimation(*player.sprite)->CurrentFrame().h};
+    SDL_Colour colour = {0x00, 0x00, 0xFF, 0xFF};
+    Game::debug_rects.push_back({debug_rect, colour});
 }
 
 void PlayerHandleInputEvent(const SDL_Event &event, Player &player)

@@ -1,10 +1,19 @@
 #pragma once
 
+#include <vector>
 #include "SDL.h"
 #include "../Vec2.h"
 
+struct DebugRect
+{
+    SDL_FRect rect;
+    SDL_Colour colour;
+};
+
 struct Game
 {
+    static std::vector<DebugRect> debug_rects;
+
     static SDL_Rect camera;
     static int screen_width;
     static int screen_height;

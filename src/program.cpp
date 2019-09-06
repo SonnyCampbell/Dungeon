@@ -167,7 +167,7 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
         }
     }
 
-    DrawPlayer(player, Game::camera);
+    DrawPlayer(player);
 }
 
 void Update()
@@ -271,7 +271,6 @@ int main(int argc, char *args[])
         SDL_RenderClear(gRenderer);
 
         HandleInput(event, quit);
-
         Update();
         UpdateEnemy(enemy);
 
@@ -284,14 +283,20 @@ int main(int argc, char *args[])
 
         render(gRenderer, gSpriteSheetTexture, loader);
 
-        DrawPlayerDebugRect(player, Game::camera);
-
         DrawEnemy(enemy);
 
         quad->clear();
         quad->insert({player.id, player.rb.aabb.boundingBox()});
         quad->insert({enemy.id, enemy.rb.aabb.boundingBox()});
         quad->draw(gRenderer); // Debug Drawing
+
+        for (auto debug_rect : Game::debug_rects)
+        {
+            SDL_SetRenderDrawColor(gRenderer, debug_rect.colour.r, debug_rect.colour.g, debug_rect.colour.b, debug_rect.colour.a);
+            SDL_RenderDrawRectF(gRenderer, &debug_rect.rect);
+            SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
+        }
+        Game::debug_rects.clear();
 
         //Update screen
         SDL_RenderPresent(gRenderer);
