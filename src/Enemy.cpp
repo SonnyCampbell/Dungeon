@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include "Game Components/Game.h"
 
 using namespace AnimatedSpriteManager;
 
@@ -18,7 +19,7 @@ Enemy NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed)
 
     auto sprite = NewAnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, IdleUp);
     EntityStats stats = {100, speed};
-    Enemy enemy = {stats, sprite, rb, nullptr};
+    Enemy enemy = {Game::NextEntityId(), stats, sprite, rb, nullptr};
 
     return enemy;
 }
@@ -29,9 +30,9 @@ void TakeDamage(Enemy &enemy, int damage)
     printf("OW! Health: %i \n", enemy.stats.health);
 }
 
-void UpdateEnemy(Enemy &enemy, double current_tick, float dt)
+void UpdateEnemy(Enemy &enemy)
 {
-    UpdateAnimation(*enemy.sprite, enemy.sprite->currentAnimationKey, current_tick);
+    UpdateAnimation(*enemy.sprite, enemy.sprite->currentAnimationKey);
 }
 
 void DrawEnemy(Enemy &enemy)

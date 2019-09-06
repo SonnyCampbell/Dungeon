@@ -29,7 +29,7 @@ Vec2 Size(const AnimatedSprite &sprite);
 
 void ResetAnimation(AnimatedSprite &sprite, AnimationKey key);
 
-Animation *UpdateAnimation(AnimatedSprite &sprite, AnimationKey key, double elapsedGameTime);
+Animation *UpdateAnimation(AnimatedSprite &sprite, AnimationKey key);
 
 void DrawSprite(AnimatedSprite &sprite, Vec2 position);
 

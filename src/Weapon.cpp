@@ -38,14 +38,14 @@ void WeaponAttack(Weapon &weapon, AttackTypes new_attack_type)
     }
 }
 
-void UpdateWeapon(Weapon &weapon, Vec2 center, double elapsed_game_time)
+void UpdateWeapon(Weapon &weapon, Vec2 center)
 {
 
     weapon.rb.aabb = AABB{center, Vec2(weapon.spritesheet_clip.w / 2.f, weapon.spritesheet_clip.w / 2.f)};
-    if (elapsed_game_time - weapon.last_frame_time > weapon.frame_length)
+    if (Game::current_tick - weapon.last_frame_time > weapon.frame_length)
     {
 
-        weapon.last_frame_time = elapsed_game_time;
+        weapon.last_frame_time = Game::current_tick;
         auto next_frame = weapon.current_attack_frame + 1;
         if (next_frame >= 4)
         {

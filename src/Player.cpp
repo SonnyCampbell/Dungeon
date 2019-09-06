@@ -12,14 +12,14 @@ Player NewPlayer(SDL_Renderer **renderer, Vec2 position, float speed)
     Vec2 frameSize = {16, 20}; //TODO Constants - Spritesheet frame width/height ---- ^ also --16:28 is default
     int runFps = 10;
     int idleFps = 5;
-    std::map<AnimationKey, Animation *> *animations = new std::map<AnimationKey, Animation *>({{IdleUp, new Animation(4, idleFps, frameSize, {128, 44})},
-                                                                                               {IdleDown, new Animation(4, idleFps, frameSize, {128, 36})},
-                                                                                               {IdleLeft, new Animation(4, idleFps, frameSize, {128, 36})},
-                                                                                               {IdleRight, new Animation(4, idleFps, frameSize, {128, 36})},
-                                                                                               {WalkUp, new Animation(4, runFps, frameSize, {192, 44})},
-                                                                                               {WalkDown, new Animation(4, runFps, frameSize, {192, 36})},
-                                                                                               {WalkLeft, new Animation(4, runFps, frameSize, {192, 36})},
-                                                                                               {WalkRight, new Animation(4, runFps, frameSize, {192, 36})}});
+    auto *animations = new std::map<AnimationKey, Animation *>({{IdleUp, new Animation(4, idleFps, frameSize, {128, 44})},
+                                                                {IdleDown, new Animation(4, idleFps, frameSize, {128, 36})},
+                                                                {IdleLeft, new Animation(4, idleFps, frameSize, {128, 36})},
+                                                                {IdleRight, new Animation(4, idleFps, frameSize, {128, 36})},
+                                                                {WalkUp, new Animation(4, runFps, frameSize, {192, 44})},
+                                                                {WalkDown, new Animation(4, runFps, frameSize, {192, 36})},
+                                                                {WalkLeft, new Animation(4, runFps, frameSize, {192, 36})},
+                                                                {WalkRight, new Animation(4, runFps, frameSize, {192, 36})}});
 
     auto rb = RigidBody(60.f, 16.f, 20.f, position, speed, Vec2(0, 0));
 
@@ -27,12 +27,12 @@ Player NewPlayer(SDL_Renderer **renderer, Vec2 position, float speed)
 
     auto weapon = createHeavyMace(renderer, rb.aabb.center, 0);
 
-    Player player = {sprite, rb, weapon};
+    Player player = {0, sprite, rb, weapon};
 
     return player;
 }
 
-void UpdatePlayer(Player &player, double currentTick, float dt)
+void UpdatePlayer(Player &player)
 {
     Vec2 currentDirection = Vec2(player.rb.direction.x(), player.rb.direction.y());
 
@@ -55,10 +55,10 @@ void UpdatePlayer(Player &player, double currentTick, float dt)
         }
     }
 
-    UpdateAnimation(*player.sprite, player.sprite->currentAnimationKey, currentTick);
+    UpdateAnimation(*player.sprite, player.sprite->currentAnimationKey);
     if (player.weapon)
     {
-        UpdateWeapon(*player.weapon, player.rb.aabb.center, currentTick);
+        UpdateWeapon(*player.weapon, player.rb.aabb.center);
     }
 }
 
@@ -79,7 +79,7 @@ void DrawPlayerDebugRect(Player &player, SDL_Rect &camera)
     SDL_SetRenderDrawColor(*player.sprite->texture.gRenderer, 0xFF, 0x00, 0x00, 0xFF);
 }
 
-void PlayerHandleInputEvent(const SDL_Event &event, Player &player, float dt)
+void PlayerHandleInputEvent(const SDL_Event &event, Player &player)
 {
     if (event.type == SDL_KEYDOWN && event.key.repeat == 0)
     {

@@ -37,11 +37,11 @@ void ResetAnimation(AnimatedSprite &sprite, AnimationKey key)
     sprite.animations->at(key)->Reset();
 }
 
-Animation *UpdateAnimation(AnimatedSprite &sprite, AnimationKey key, double elapsedGameTime)
+Animation *UpdateAnimation(AnimatedSprite &sprite, AnimationKey key)
 {
     if (sprite.isAnimating)
     {
-        return sprite.animations->at(key)->Update(elapsedGameTime);
+        return sprite.animations->at(key)->Update();
     }
     else
     {

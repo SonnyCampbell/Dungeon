@@ -43,7 +43,7 @@ void DeleteWeapon(Weapon &weapon);
 void DrawWeapon(Weapon &weapon, Vec2 position, int frame, bool facingRight);
 void ResetFrames(Weapon &weapon);
 void WeaponAttack(Weapon &weapon, AttackTypes attack_type);
-void UpdateWeapon(Weapon &weapon, Vec2 center, double elapsed_game_time);
+void UpdateWeapon(Weapon &weapon, Vec2 center);
 Weapon *createSword(SDL_Renderer **renderer, Vec2 position, int current_frame);
 Weapon *createNailBoard(SDL_Renderer **renderer, Vec2 position, int current_frame);
 Weapon *createHeavyMace(SDL_Renderer **renderer, Vec2 position, int current_frame);

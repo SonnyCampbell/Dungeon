@@ -2,6 +2,7 @@
 #include <SDL.h>
 
 #include "Vec2.h"
+#include "Game Components/Game.h"
 
 class Animation
 {
@@ -58,12 +59,12 @@ public:
         lastFrameTime = 0;
     }
 
-    Animation *Update(double elapsedGameTime)
+    Animation *Update()
     {
         //double currentTime = lastFrameTime + elapsedGameTime;
-        if (elapsedGameTime - lastFrameTime > frameLength)
+        if (Game::current_tick - lastFrameTime > frameLength)
         {
-            lastFrameTime = elapsedGameTime;
+            lastFrameTime = Game::current_tick;
             current_frame = (current_frame + 1) % framesCount;
         }
 

@@ -17,10 +17,6 @@
 using namespace PlayerManager;
 using namespace EnemyManager;
 
-double lastTick = 0;
-double currentTick = 0;
-float dt = 0.0f;
-
 // Global Window
 SDL_Window *gWindow = NULL;
 
@@ -174,11 +170,11 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
     DrawPlayer(player, Game::camera);
 }
 
-void Update(double currentTick, float dt)
+void Update()
 {
-    UpdatePlayer(player, currentTick, dt);
+    UpdatePlayer(player);
     auto collision_layer = map1->getTileLayers()->at(2);
-    auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player.rb, dt, gRenderer);
+    auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player.rb, Game::tick_delta(), gRenderer);
 
     if (collisions.size() > 0)
     {
@@ -201,8 +197,11 @@ void Update(double currentTick, float dt)
 
         Vec2 currentDirection = Vec2(player.rb.direction.x(), player.rb.direction.y());
         currentDirection.normalize();
-        auto collision_corrected_direction = Vec2(currentDirection.x() - (currentDirection.x() * collision_vector.x()), currentDirection.y() - (currentDirection.y() * collision_vector.y()));
-        player.rb.aabb.center = player.rb.aabb.center + (collision_corrected_direction * player.rb.speed * dt);
+        auto collision_corrected_direction =
+            Vec2(currentDirection.x() - (currentDirection.x() * collision_vector.x()),
+                 currentDirection.y() - (currentDirection.y() * collision_vector.y()));
+
+        player.rb.aabb.center = player.rb.aabb.center + (collision_corrected_direction * player.rb.speed * Game::tick_delta());
 
         Game::UpdateCamera(player.rb.aabb.center);
 
@@ -211,7 +210,7 @@ void Update(double currentTick, float dt)
 
     Vec2 currentDirection = Vec2(player.rb.direction.x(), player.rb.direction.y());
     currentDirection.normalize();
-    player.rb.aabb.center = player.rb.aabb.center + (currentDirection * player.rb.speed * dt);
+    player.rb.aabb.center = player.rb.aabb.center + (currentDirection * player.rb.speed * Game::tick_delta());
 
     Game::UpdateCamera(player.rb.aabb.center);
 }
@@ -235,7 +234,7 @@ void HandleInput(SDL_Event &event, bool &quit)
             }
         }
 
-        PlayerHandleInputEvent(event, player, dt);
+        PlayerHandleInputEvent(event, player);
     }
 }
 
@@ -264,17 +263,17 @@ int main(int argc, char *args[])
     SDL_Event event;
     while (!quit)
     {
-        currentTick = SDL_GetTicks();
-        dt = (currentTick - lastTick) / 1000.0f;
-        lastTick = currentTick;
+        Game::last_tick = Game::current_tick;
+        Game::current_tick = SDL_GetTicks();
+
         //Clear screen
         SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(gRenderer);
 
         HandleInput(event, quit);
 
-        Update(currentTick, dt);
-        UpdateEnemy(enemy, currentTick, dt);
+        Update();
+        UpdateEnemy(enemy);
 
         auto hit = Collision::checkBoxCollision(player.weapon->collision_box, enemy.rb.aabb.boundingBox());
         if (hit)
@@ -290,14 +289,14 @@ int main(int argc, char *args[])
         DrawEnemy(enemy);
 
         quad->clear();
-        quad->insert(player.rb.aabb.boundingBox());
-        quad->insert(enemy.rb.aabb.boundingBox());
+        quad->insert({player.id, player.rb.aabb.boundingBox()});
+        quad->insert({enemy.id, enemy.rb.aabb.boundingBox()});
         quad->draw(gRenderer); // Debug Drawing
 
         //Update screen
         SDL_RenderPresent(gRenderer);
 
-        float seconds = (currentTick / 1000.f);
+        float seconds = (Game::current_tick / 1000.f);
         float fps = (float)totalFrames++ / seconds;
     }
 

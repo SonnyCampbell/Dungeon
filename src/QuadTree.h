@@ -2,6 +2,12 @@
 #include "SDL.h"
 #include "Game Components/Game.h"
 
+struct QuadCollionObject
+{
+    int id;
+    SDL_Rect collision_rect;
+};
+
 class QuadTree
 {
 private:
@@ -9,7 +15,7 @@ private:
     const int max_levels = 3;
 
     int level;
-    std::vector<SDL_Rect> objects; //TODO - Some sort of transformation object with entity id
+    std::vector<QuadCollionObject> objects; //TODO - Some sort of transformation object with entity id
     SDL_Rect bounds;
     std::vector<QuadTree> nodes;
 
@@ -19,16 +25,16 @@ public:
 
     void clear();
     void split();
-    int getIndex(SDL_Rect rect);
-    void insert(SDL_Rect rect);
-    std::vector<SDL_Rect> retrieve(std::vector<SDL_Rect> &return_list, SDL_Rect rect);
+    int getIndex(QuadCollionObject rect);
+    void insert(QuadCollionObject rect);
+    std::vector<QuadCollionObject> retrieve(std::vector<QuadCollionObject> &return_list, QuadCollionObject rect);
     void draw(SDL_Renderer *renderer);
 };
 
 QuadTree::QuadTree(int p_level, SDL_Rect p_bounds)
 {
     level = p_level;
-    objects = std::vector<SDL_Rect>();
+    objects = std::vector<QuadCollionObject>();
     bounds = p_bounds;
     nodes = std::vector<QuadTree>();
 }
@@ -68,19 +74,19 @@ void QuadTree::split()
  * object cannot completely fit within a child node and is part
  * of the parent node
  */
-int QuadTree::getIndex(SDL_Rect rect)
+int QuadTree::getIndex(QuadCollionObject object)
 {
     int index = -1;
     double vertical_midpoint = bounds.x + (bounds.w / 2);
     double horizontal_midpoint = bounds.y + (bounds.h / 2);
 
     // Object can completely fit within the top quadrants
-    bool topQuadrant = (rect.y < horizontal_midpoint && rect.y + rect.h < horizontal_midpoint);
+    bool topQuadrant = (object.collision_rect.y < horizontal_midpoint && object.collision_rect.y + object.collision_rect.h < horizontal_midpoint);
     // Object can completely fit within the bottom quadrants
-    bool bottomQuadrant = (rect.y > horizontal_midpoint);
+    bool bottomQuadrant = (object.collision_rect.y > horizontal_midpoint);
 
     // Object can completely fit within the left quadrants
-    if (rect.x < vertical_midpoint && rect.x + rect.w < vertical_midpoint)
+    if (object.collision_rect.x < vertical_midpoint && object.collision_rect.x + object.collision_rect.w < vertical_midpoint)
     {
         if (topQuadrant)
         {
@@ -92,7 +98,7 @@ int QuadTree::getIndex(SDL_Rect rect)
         }
     }
     // Object can completely fit within the right quadrants
-    else if (rect.x > vertical_midpoint)
+    else if (object.collision_rect.x > vertical_midpoint)
     {
         if (topQuadrant)
         {
@@ -107,21 +113,21 @@ int QuadTree::getIndex(SDL_Rect rect)
     return index;
 }
 
-void QuadTree::insert(SDL_Rect rect)
+void QuadTree::insert(QuadCollionObject object)
 {
     if (!nodes.empty())
     {
-        int index = getIndex(rect);
+        int index = getIndex(object);
 
         if (index != -1)
         {
-            nodes[index].insert(rect);
+            nodes[index].insert(object);
 
             return;
         }
     }
 
-    objects.push_back(rect);
+    objects.push_back(object);
 
     if (objects.size() > max_objects && level < max_levels)
     {
@@ -151,12 +157,12 @@ void QuadTree::insert(SDL_Rect rect)
     }
 }
 
-std::vector<SDL_Rect> QuadTree::retrieve(std::vector<SDL_Rect> &return_list, SDL_Rect rect)
+std::vector<QuadCollionObject> QuadTree::retrieve(std::vector<QuadCollionObject> &return_list, QuadCollionObject object)
 {
-    int index = getIndex(rect);
+    int index = getIndex(object);
     if (index != -1 && !nodes.empty())
     {
-        nodes[index].retrieve(return_list, rect);
+        nodes[index].retrieve(return_list, object);
     }
 
     for (auto object : objects)

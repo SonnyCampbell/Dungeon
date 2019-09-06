@@ -1,5 +1,15 @@
 #include "Game.h"
 
+static int entity_id = 4;
+
+int Game::current_tick = 0;
+int Game::last_tick = 0;
+
+float Game::tick_delta()
+{
+    return (current_tick - last_tick) / 1000.0f;
+}
+
 int Game::screen_width = 600;
 int Game::screen_height = 600;
 float Game::render_scale = 1.5;
@@ -30,4 +40,9 @@ void Game::UpdateCamera(Vec2 player_position)
     {
         camera.y = (level_height - camera.h) / render_scale;
     }
+}
+
+int Game::NextEntityId()
+{
+    return entity_id++;
 }

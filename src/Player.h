@@ -1,4 +1,5 @@
 #pragma once
+#include "Game Components/Game.h"
 #include "AnimatedSprite.h"
 #include "Vec2.h"
 #include "RigidBody.h"
@@ -7,6 +8,7 @@
 
 struct Player
 {
+    int id = 0;
     AnimatedSprite *sprite;
     RigidBody rb;
     Weapon *weapon;
@@ -15,9 +17,9 @@ struct Player
 namespace PlayerManager
 {
 Player NewPlayer(SDL_Renderer **renderer, Vec2 position, float speed = 166.0f);
-void UpdatePlayer(Player &player, double currentTick, float dt);
-void DrawPlayer(Player &player, SDL_Rect &cameran);
-void PlayerHandleInputEvent(const SDL_Event &event, Player &player, float dt);
+void UpdatePlayer(Player &player);
+void DrawPlayer(Player &player, SDL_Rect &camera);
+void PlayerHandleInputEvent(const SDL_Event &event, Player &player);
 void PlayerAttack(Player player, AttackTypes attack_type);
 void UpdatePlayerDirection(Player &player, Vec2 movement_vector);
 void DrawPlayerDebugRect(Player &player, SDL_Rect &camera);
