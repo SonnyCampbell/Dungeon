@@ -35,6 +35,7 @@ void WeaponAttack(Weapon &weapon, AttackTypes new_attack_type)
     {
         weapon.isAttacking = true;
         weapon.attack_type = new_attack_type;
+        weapon.last_frame_time = Game::current_tick;
     }
 }
 
@@ -42,19 +43,18 @@ void UpdateWeapon(Weapon &weapon, Vec2 center)
 {
 
     weapon.rb.aabb = AABB{center, Vec2(weapon.spritesheet_clip.w / 2.f, weapon.spritesheet_clip.w / 2.f)};
-    if (Game::current_tick - weapon.last_frame_time > weapon.frame_length)
+    if (weapon.isAttacking && Game::current_tick - weapon.last_frame_time > weapon.frame_length)
     {
-
         weapon.last_frame_time = Game::current_tick;
-        auto next_frame = weapon.current_attack_frame + 1;
-        if (next_frame >= 4)
+
+        if (weapon.current_attack_frame >= 4)
         {
             weapon.isAttacking = false;
             weapon.current_attack_frame = 0;
             ResetFrames(weapon);
             return;
         }
-        weapon.current_attack_frame = (next_frame) % 4;
+        weapon.current_attack_frame++;
     }
 }
 

@@ -275,18 +275,19 @@ std::vector<CollisionResponse> collision(TMXTileLayer &tileLayer, TMXTileSet &ti
 
         if (collision.collision)
         {
-            SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
-            SDL_RenderDrawRectF(renderer, &debugRect);
+            SDL_Colour colour = {0xFF, 0x00, 0x00, 0xFF};
+            Game::debug_rects.push_back({debugRect, colour});
+
             auto bounds = bp_tile.tile.getCollisionBoundary();
             SDL_FRect collision_rect = {(float)destX + bounds.x - Game::camera.x, (float)destY + bounds.y - Game::camera.y, (float)bounds.w, (float)bounds.h};
-            SDL_RenderDrawRectF(renderer, &collision_rect);
+            Game::debug_rects.push_back({collision_rect, colour});
 
             collisionResponses.push_back(collision);
         }
         else
         {
-            SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
-            SDL_RenderDrawRectF(renderer, &debugRect);
+            SDL_Colour colour = {0x00, 0xFF, 0x00, 0xFF};
+            Game::debug_rects.push_back({debugRect, colour});
         }
     }
 

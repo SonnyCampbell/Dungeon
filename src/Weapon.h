@@ -33,7 +33,7 @@ struct Weapon
          {120.f, Vec2(7, 7), Vec2(3.f, 11.f)},
          {160.f, Vec2(0, 10), Vec2(0.f, 12.f)},
          {190.f, Vec2(-10, 10), Vec2(-1.f, 12.f)}};
-    float frame_length = 33.f; //TODO Attack Speed
+    float frame_length = 60.f; //TODO Attack Speed
 };
 
 namespace WeaponManager

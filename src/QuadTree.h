@@ -27,7 +27,7 @@ public:
     void split();
     int getIndex(QuadCollionObject rect);
     void insert(QuadCollionObject rect);
-    std::vector<QuadCollionObject> retrieve(std::vector<QuadCollionObject> &return_list, QuadCollionObject rect);
+    void retrieve(std::vector<QuadCollionObject> &return_list, QuadCollionObject rect);
     void draw(SDL_Renderer *renderer);
 };
 
@@ -157,7 +157,7 @@ void QuadTree::insert(QuadCollionObject object)
     }
 }
 
-std::vector<QuadCollionObject> QuadTree::retrieve(std::vector<QuadCollionObject> &return_list, QuadCollionObject object)
+void QuadTree::retrieve(std::vector<QuadCollionObject> &return_list, QuadCollionObject object)
 {
     int index = getIndex(object);
     if (index != -1 && !nodes.empty())
@@ -169,8 +169,6 @@ std::vector<QuadCollionObject> QuadTree::retrieve(std::vector<QuadCollionObject>
     {
         return_list.push_back(object);
     }
-
-    return return_list;
 }
 
 void QuadTree::draw(SDL_Renderer *renderer)

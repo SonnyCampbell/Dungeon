@@ -158,9 +158,9 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader)
                     //DEBUG DRAWING
                     // if (index == 2)
                     // {
-                    //     SDL_Rect x = {destX, destY, tileWidth, tileHeight};
-                    //     SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-                    //     SDL_RenderDrawRect(gRenderer, &x);
+                    //     SDL_FRect rect = {destX, destY, tileWidth, tileHeight};
+                    //     SDL_Colour colour = {0x00, 0x00, 0xFF, 0xFF};
+                    //     Game::debug_rects.push_back({rect, colour});
                     // }
                 }
             }
@@ -282,13 +282,20 @@ int main(int argc, char *args[])
         }
 
         render(gRenderer, gSpriteSheetTexture, loader);
-
         DrawEnemy(enemy);
 
         quad->clear();
         quad->insert({player.id, player.rb.aabb.boundingBox()});
         quad->insert({enemy.id, enemy.rb.aabb.boundingBox()});
         quad->draw(gRenderer); // Debug Drawing
+
+        std::vector<QuadCollionObject> possible_hits = std::vector<QuadCollionObject>();
+        quad->retrieve(possible_hits, {player.id, player.rb.aabb.boundingBox()});
+        for (auto hit : possible_hits)
+        {
+            if (hit.id != player.id)
+                printf("Possible collision: %i\n", hit.id);
+        }
 
         for (auto debug_rect : Game::debug_rects)
         {
