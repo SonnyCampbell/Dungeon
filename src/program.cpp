@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <unordered_map>
 
 #include "Game Components/Game.h"
 #include "LTexture.h"
@@ -32,6 +33,7 @@ LTexture gSpriteSheetTexture(&gRenderer);
 SDL_Surface *gScreenSurface = NULL;
 
 Player player = {};
+std::unordered_map<int, Enemy *> enemies = std::unordered_map<int, Enemy *>();
 
 bool init()
 {
@@ -255,6 +257,7 @@ int main(int argc, char *args[])
 
     player = NewPlayer(&gRenderer, {100, 100});
     auto enemy = NewEnemy1(&gRenderer, {100, 180});
+    enemies.insert({enemy->id, enemy});
 
     QuadTree *quad = new QuadTree(0, {0, 0, 480, 480});
 
@@ -272,29 +275,34 @@ int main(int argc, char *args[])
 
         HandleInput(event, quit);
         Update();
-        UpdateEnemy(enemy);
-
-        auto hit = Collision::checkBoxCollision(player.weapon->collision_box, enemy.rb.aabb.boundingBox());
-        if (hit)
-        {
-            EnemyManager::TakeDamage(enemy, player.weapon->damage);
-            printf("Hit \n");
-        }
+        UpdateEnemy(*enemy);
 
         render(gRenderer, gSpriteSheetTexture, loader);
-        DrawEnemy(enemy);
+        DrawEnemy(*enemy);
 
         quad->clear();
         quad->insert({player.id, player.rb.aabb.boundingBox()});
-        quad->insert({enemy.id, enemy.rb.aabb.boundingBox()});
+        quad->insert({enemy->id, enemy->rb.aabb.boundingBox()});
         quad->draw(gRenderer); // Debug Drawing
 
-        std::vector<QuadCollionObject> possible_hits = std::vector<QuadCollionObject>();
-        quad->retrieve(possible_hits, {player.id, player.rb.aabb.boundingBox()});
-        for (auto hit : possible_hits)
+        std::vector<QuadCollionObject> possible_collisions = std::vector<QuadCollionObject>();
+        quad->retrieve(possible_collisions, {player.id, player.rb.aabb.boundingBox()});
+        for (auto collision : possible_collisions)
         {
-            if (hit.id != player.id)
-                printf("Possible collision: %i\n", hit.id);
+            if (collision.id == player.id)
+                continue;
+
+            if (player.weapon->isAttacking && player.weapon->targets_hit.find(collision.id) == player.weapon->targets_hit.end())
+            {
+                auto hit = Collision::checkBoxCollision(player.weapon->collision_box, collision.collision_rect);
+                if (hit)
+                {
+                    auto hitEnemy = enemies[collision.id];
+                    EnemyManager::TakeDamage(*hitEnemy, player.weapon->damage);
+                    player.weapon->targets_hit.insert(collision.id);
+                    printf("Hit \n");
+                }
+            }
         }
 
         for (auto debug_rect : Game::debug_rects)

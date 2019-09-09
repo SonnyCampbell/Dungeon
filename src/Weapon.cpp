@@ -15,6 +15,7 @@ Weapon *NewWeapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 of
 
     auto weapon = new Weapon{*texture, rb, offset, clip, current_frame_count};
     weapon->damage = damage;
+    weapon->targets_hit = std::set<int>();
     return weapon;
 }
 
@@ -30,7 +31,6 @@ void ResetFrames(Weapon &weapon)
 
 void WeaponAttack(Weapon &weapon, AttackTypes new_attack_type)
 {
-    printf("Attack!\n");
     if (!weapon.isAttacking)
     {
         weapon.isAttacking = true;
@@ -51,6 +51,7 @@ void UpdateWeapon(Weapon &weapon, Vec2 center)
         {
             weapon.isAttacking = false;
             weapon.current_attack_frame = 0;
+            weapon.targets_hit.clear();
             ResetFrames(weapon);
             return;
         }

@@ -1,4 +1,6 @@
 #pragma once
+#include <set>
+
 #include "RigidBody.h"
 #include "AnimatedSprite.h"
 #include "AttackTypes.h"
@@ -18,6 +20,8 @@ struct Weapon
     Vec2 offset;
     SDL_Rect spritesheet_clip;
     SDL_Rect collision_box;
+    std::set<int> targets_hit;
+
     int total_current_frame = 4;
     int current_frame = 0;
     int direction = 0;

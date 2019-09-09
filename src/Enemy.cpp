@@ -5,7 +5,7 @@ using namespace AnimatedSpriteManager;
 
 namespace EnemyManager
 {
-Enemy NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed)
+Enemy *NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed)
 {
     Vec2 frameSize = {16, 16}; //TODO Constants - Spritesheet frame width/height ---- ^ also --16:28 is default
     int runFps = 10;
@@ -19,7 +19,7 @@ Enemy NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed)
 
     auto sprite = NewAnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, IdleUp);
     EntityStats stats = {100, speed};
-    Enemy enemy = {Game::NextEntityId(), stats, sprite, rb, nullptr};
+    Enemy *enemy = new Enemy{Game::NextEntityId(), stats, sprite, rb, nullptr};
 
     return enemy;
 }
