@@ -43,7 +43,7 @@ struct Weapon
 namespace WeaponManager
 {
 Weapon *NewWeapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 offset, int current_frame, int damage);
-void DeleteWeapon(Weapon &weapon);
+void DeleteWeapon(Weapon *weapon);
 void DrawWeapon(Weapon &weapon, Vec2 position, int frame, bool facingRight);
 void ResetFrames(Weapon &weapon);
 void WeaponAttack(Weapon &weapon, AttackTypes attack_type);

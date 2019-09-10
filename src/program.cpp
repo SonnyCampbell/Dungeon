@@ -10,7 +10,8 @@
 #include "AnimatedSprite.h"
 #include "AnimationKey.h"
 #include "Player.h"
-#include "Enemy.h"
+#include "EnemyManager.h"
+#include "Structs/Enemy.h"
 #include "TMXLoader/TMXLoader.h"
 #include "Collision.h"
 #include "QuadTree.h"
@@ -33,7 +34,7 @@ LTexture gSpriteSheetTexture(&gRenderer);
 SDL_Surface *gScreenSurface = NULL;
 
 Player player = {};
-std::unordered_map<int, Enemy *> enemies = std::unordered_map<int, Enemy *>();
+std::vector<Enemy *> enemies = std::vector<Enemy *>();
 
 bool init()
 {
@@ -256,8 +257,8 @@ int main(int argc, char *args[])
     }
 
     player = NewPlayer(&gRenderer, {100, 100});
-    auto enemy = NewEnemy1(&gRenderer, {100, 180});
-    enemies.insert({enemy->id, enemy});
+    auto enemy1 = NewEnemy1(&gRenderer, {100, 180});
+    enemies.push_back(enemy1);
 
     QuadTree *quad = new QuadTree(0, {0, 0, 480, 480});
 
@@ -272,17 +273,23 @@ int main(int argc, char *args[])
         //Clear screen
         SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
         SDL_RenderClear(gRenderer);
+        quad->clear();
 
         HandleInput(event, quit);
         Update();
-        UpdateEnemy(*enemy);
+        for (auto enemy : enemies)
+        {
+            UpdateEnemy(*enemy, player);
+        }
 
         render(gRenderer, gSpriteSheetTexture, loader);
-        DrawEnemy(*enemy);
+        for (auto enemy : enemies)
+        {
+            DrawEnemy(*enemy);
+            quad->insert({enemy->id, enemy->rb.aabb.boundingBox()});
+        }
 
-        quad->clear();
         quad->insert({player.id, player.rb.aabb.boundingBox()});
-        quad->insert({enemy->id, enemy->rb.aabb.boundingBox()});
         quad->draw(gRenderer); // Debug Drawing
 
         std::vector<QuadCollionObject> possible_collisions = std::vector<QuadCollionObject>();
@@ -297,10 +304,28 @@ int main(int argc, char *args[])
                 auto hit = Collision::checkBoxCollision(player.weapon->collision_box, collision.collision_rect);
                 if (hit)
                 {
-                    auto hitEnemy = enemies[collision.id];
+                    auto it = std::find_if(enemies.begin(), enemies.end(),
+                                           [collision](const Enemy *val) {
+                                               if (val->id == collision.id)
+                                                   return true;
+                                               return false;
+                                           });
+
+                    if (it == enemies.end())
+                    {
+                        continue;
+                    }
+
+                    auto hitEnemy = *it;
                     EnemyManager::TakeDamage(*hitEnemy, player.weapon->damage);
                     player.weapon->targets_hit.insert(collision.id);
                     printf("Hit \n");
+
+                    // if (hitEnemy->stats.health <= 0)
+                    // {
+                    //     enemies.erase(it);
+                    //     EnemyManager::DeleteEnemy(**it);
+                    // }
                 }
             }
         }

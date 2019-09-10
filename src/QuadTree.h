@@ -169,6 +169,18 @@ void QuadTree::retrieve(std::vector<QuadCollionObject> &return_list, QuadCollion
     {
         return_list.push_back(object);
     }
+
+    // TODO: More thought into how to handle this
+    // If player on border, need to add collision
+    // objects from sibling quads, but what sort
+    // of effect does this have on performance?
+    if (index == -1 && !nodes.empty())
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            nodes[i].retrieve(return_list, object);
+        }
+    }
 }
 
 void QuadTree::draw(SDL_Renderer *renderer)

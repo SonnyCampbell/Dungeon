@@ -19,8 +19,9 @@ Weapon *NewWeapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 of
     return weapon;
 }
 
-void DeleteWeapon()
+void DeleteWeapon(Weapon *weapon)
 {
+    delete weapon;
 }
 
 void ResetFrames(Weapon &weapon)
