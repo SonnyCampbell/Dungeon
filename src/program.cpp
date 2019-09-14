@@ -15,6 +15,7 @@
 #include "TMXLoader/TMXLoader.h"
 #include "Collision.h"
 #include "QuadTree.h"
+#include "State/FSMTableState.h"
 
 using namespace PlayerManager;
 using namespace EnemyManager;
@@ -34,7 +35,8 @@ LTexture gSpriteSheetTexture(&gRenderer);
 SDL_Surface *gScreenSurface = NULL;
 
 Player player = {};
-std::vector<Enemy *> enemies = std::vector<Enemy *>();
+std::vector<Enemy> enemies = std::vector<Enemy>();
+auto enemy_states = FSMTableState::StateMachineData();
 
 bool init()
 {
@@ -258,7 +260,8 @@ int main(int argc, char *args[])
 
     player = NewPlayer(&gRenderer, {100, 100});
     auto enemy1 = NewEnemy1(&gRenderer, {100, 180});
-    enemies.push_back(enemy1);
+    //enemies.push_back(enemy1);
+    enemy_states.idles.push_back(enemy1);
 
     QuadTree *quad = new QuadTree(0, {0, 0, 480, 480});
 
@@ -277,16 +280,18 @@ int main(int argc, char *args[])
 
         HandleInput(event, quit);
         Update();
-        for (auto enemy : enemies)
+        enemy_states.UpdateStates(Game::tick_delta(), player);
+        enemies = enemy_states.AllEnemies();
+        for (auto &enemy : enemies)
         {
-            UpdateEnemy(*enemy, player);
+            UpdateEnemy(enemy, player);
         }
 
         render(gRenderer, gSpriteSheetTexture, loader);
-        for (auto enemy : enemies)
+        for (auto &enemy : enemies)
         {
-            DrawEnemy(*enemy);
-            quad->insert({enemy->id, enemy->rb.aabb.boundingBox()});
+            DrawEnemy(enemy);
+            quad->insert({enemy.id, enemy.rb.aabb.boundingBox()});
         }
 
         quad->insert({player.id, player.rb.aabb.boundingBox()});
@@ -294,7 +299,7 @@ int main(int argc, char *args[])
 
         std::vector<QuadCollionObject> possible_collisions = std::vector<QuadCollionObject>();
         quad->retrieve(possible_collisions, {player.id, player.rb.aabb.boundingBox()});
-        for (auto collision : possible_collisions)
+        for (auto &collision : possible_collisions)
         {
             if (collision.id == player.id)
                 continue;
@@ -305,8 +310,8 @@ int main(int argc, char *args[])
                 if (hit)
                 {
                     auto it = std::find_if(enemies.begin(), enemies.end(),
-                                           [collision](const Enemy *val) {
-                                               if (val->id == collision.id)
+                                           [collision](const Enemy val) {
+                                               if (val.id == collision.id)
                                                    return true;
                                                return false;
                                            });
@@ -317,7 +322,7 @@ int main(int argc, char *args[])
                     }
 
                     auto hitEnemy = *it;
-                    EnemyManager::TakeDamage(*hitEnemy, player.weapon->damage);
+                    EnemyManager::TakeDamage(hitEnemy, player.weapon->damage);
                     player.weapon->targets_hit.insert(collision.id);
                     printf("Hit \n");
 

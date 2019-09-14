@@ -4,7 +4,7 @@ using namespace AnimatedSpriteManager;
 
 namespace EnemyManager
 {
-Enemy *NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed)
+Enemy NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed)
 {
     Vec2 frameSize = {16, 16}; //TODO Constants - Spritesheet frame width/height ---- ^ also --16:28 is default
     int runFps = 10;
@@ -18,10 +18,9 @@ Enemy *NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed)
 
     auto sprite = NewAnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, IdleUp);
     EntityStats stats = {100, speed};
-    EnemyIdleState *idleState = new EnemyIdleState();
-    Enemy *enemy = new Enemy{Game::NextEntityId(), stats, sprite, rb, nullptr, idleState};
+    Enemy *enemy = new Enemy{Game::NextEntityId(), stats, sprite, rb, nullptr};
 
-    return enemy;
+    return *enemy;
 }
 
 void DeleteEnemy(Enemy &enemy)
@@ -48,8 +47,7 @@ void TakeDamage(Enemy &enemy, int damage)
 
 void UpdateEnemy(Enemy &enemy, Player &player)
 {
-    SimpleAI::Update(enemy, player);
-    enemy.rb.aabb.center = enemy.rb.aabb.center + (enemy.rb.direction * enemy.rb.speed * Game::tick_delta());
+    //enemy.rb.aabb.center = enemy.rb.aabb.center + (enemy.rb.direction * enemy.rb.speed * Game::tick_delta());
 
     UpdateAnimation(*enemy.sprite, enemy.sprite->currentAnimationKey);
 }

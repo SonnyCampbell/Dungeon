@@ -7,7 +7,7 @@ EnemyIdleState::~EnemyIdleState()
 {
 }
 
-EnemyState *EnemyIdleState::update(Enemy &enemy)
+void EnemyIdleState::update(Enemy &enemy)
 {
     printf("Idling... \n");
 }

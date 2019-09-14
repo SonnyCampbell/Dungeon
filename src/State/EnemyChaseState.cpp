@@ -7,7 +7,7 @@ EnemyChaseState::~EnemyChaseState()
 {
 }
 
-EnemyState *EnemyChaseState::update(Enemy &enemy)
+void EnemyChaseState::update(Enemy &enemy)
 {
     printf("Chasing... \n");
 }

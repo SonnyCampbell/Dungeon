@@ -6,11 +6,10 @@ void Update(Enemy &enemy, Player &player)
 {
     //If enemy can see player
     //  move towards player
-    auto separation_vector = player.rb.aabb.center - enemy.rb.aabb.center;
+    /* auto separation_vector = player.rb.aabb.center - enemy.rb.aabb.center;
     auto dist = separation_vector.length();
     if (dist < 50 && dist > 8)
     {
-        auto state = enemy.state->update(enemy);
         if (state)
         {
             delete enemy.state;
@@ -29,7 +28,7 @@ void Update(Enemy &enemy, Player &player)
         }
         enemy.rb.direction = Vec2::zero();
     }
-
+ */
     //else
     // move back towards starting position
 }

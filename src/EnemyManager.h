@@ -13,7 +13,7 @@
 
 namespace EnemyManager
 {
-Enemy *NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed = 6.0f);
+Enemy NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed = 6.0f);
 void DeleteEnemy(Enemy &enemy);
 void UpdateEnemy(Enemy &enemy, Player &player);
 void DrawEnemy(Enemy &enemy);
