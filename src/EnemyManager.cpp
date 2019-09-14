@@ -18,7 +18,8 @@ Enemy *NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed)
 
     auto sprite = NewAnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, IdleUp);
     EntityStats stats = {100, speed};
-    Enemy *enemy = new Enemy{Game::NextEntityId(), stats, sprite, rb, nullptr};
+    EnemyIdleState *idleState = new EnemyIdleState();
+    Enemy *enemy = new Enemy{Game::NextEntityId(), stats, sprite, rb, nullptr, idleState};
 
     return enemy;
 }

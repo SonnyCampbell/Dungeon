@@ -8,6 +8,8 @@
 #include "Structs/Enemy.h"
 #include "SimpleAI.h"
 #include "Player.h"
+#include "State/EnemyState.h"
+#include "State/EnemyIdleState.h"
 
 namespace EnemyManager
 {

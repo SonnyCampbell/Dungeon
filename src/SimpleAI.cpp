@@ -10,10 +10,23 @@ void Update(Enemy &enemy, Player &player)
     auto dist = separation_vector.length();
     if (dist < 50 && dist > 8)
     {
+        auto state = enemy.state->update(enemy);
+        if (state)
+        {
+            delete enemy.state;
+            enemy.state = state;
+        }
         enemy.rb.direction = separation_vector.normalized_vector();
     }
     else
     {
+
+        auto state = enemy.state->update(enemy);
+        if (state)
+        {
+            delete enemy.state;
+            enemy.state = state;
+        }
         enemy.rb.direction = Vec2::zero();
     }
 

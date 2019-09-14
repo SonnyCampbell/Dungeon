@@ -1,10 +1,12 @@
 #pragma once
 
-#include "AnimatedSprite.h"
-#include "RigidBody.h"
-#include "Weapon.h"
-#include "EntityStats.h"
+#include "..\AnimatedSprite.h"
+#include "..\RigidBody.h"
+#include "..\Weapon.h"
+#include "..\EntityStats.h"
+#include "..\State\EnemyState.h"
 
+class EnemyState;
 struct Enemy
 {
     int id;
@@ -12,4 +14,5 @@ struct Enemy
     AnimatedSprite *sprite;
     RigidBody rb;
     Weapon *weapon;
+    EnemyState *state;
 };

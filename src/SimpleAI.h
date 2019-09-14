@@ -3,7 +3,8 @@
 #include "Structs/Enemy.h"
 #include "Player.h"
 #include "Vec2.h"
-
+#include "State/EnemyIdleState.h"
+#include "State/EnemyChaseState.h"
 namespace SimpleAI
 {
 // void MakeDecision(Enemy &enemy, Player &player);
