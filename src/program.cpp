@@ -281,22 +281,17 @@ int main(int argc, char *args[])
         HandleInput(event, quit);
         Update();
         enemy_states.UpdateStates(Game::tick_delta(), player);
+
         enemies = enemy_states.AllEnemies();
         for (auto &enemy : enemies)
         {
             UpdateEnemy(enemy, player);
-        }
-
-        render(gRenderer, gSpriteSheetTexture, loader);
-        for (auto &enemy : enemies)
-        {
-            DrawEnemy(enemy);
             quad->insert({enemy.id, enemy.rb.aabb.boundingBox()});
         }
 
         quad->insert({player.id, player.rb.aabb.boundingBox()});
-        quad->draw(gRenderer); // Debug Drawing
 
+        std::vector<int> killed_enemies = std::vector<int>();
         std::vector<QuadCollionObject> possible_collisions = std::vector<QuadCollionObject>();
         quad->retrieve(possible_collisions, {player.id, player.rb.aabb.boundingBox()});
         for (auto &collision : possible_collisions)
@@ -311,9 +306,7 @@ int main(int argc, char *args[])
                 {
                     auto it = std::find_if(enemies.begin(), enemies.end(),
                                            [collision](const Enemy val) {
-                                               if (val.id == collision.id)
-                                                   return true;
-                                               return false;
+                                               return val.id == collision.id;
                                            });
 
                     if (it == enemies.end())
@@ -326,14 +319,22 @@ int main(int argc, char *args[])
                     player.weapon->targets_hit.insert(collision.id);
                     printf("Hit \n");
 
-                    // if (hitEnemy->stats.health <= 0)
-                    // {
-                    //     enemies.erase(it);
-                    //     EnemyManager::DeleteEnemy(**it);
-                    // }
+                    if (hitEnemy.stats.health <= 0)
+                    {
+                        enemies.erase(it);
+                        EnemyManager::DeleteEnemy(*it);
+                        enemy_states.DeleteEnemyState(hitEnemy.id);
+                    }
                 }
             }
         }
+
+        render(gRenderer, gSpriteSheetTexture, loader);
+        for (auto &enemy : enemies)
+        {
+            DrawEnemy(enemy);
+        }
+        quad->draw(gRenderer); // Debug Drawing
 
         for (auto debug_rect : Game::debug_rects)
         {

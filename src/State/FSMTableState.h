@@ -3,6 +3,7 @@
 #include "../Vec2.h"
 #include "../Player.h"
 #include "../Structs/Enemy.h"
+#include "../EnemyManager.h"
 
 namespace FSMTableState
 {
@@ -26,6 +27,35 @@ struct StateMachineData
         all_enemies.insert(all_enemies.end(), idles.begin(), idles.end());
         all_enemies.insert(all_enemies.end(), chasings.begin(), chasings.end());
         return all_enemies;
+    }
+
+    void DeleteEnemyState(int enemy_id)
+    {
+        // For now this deletes the whole enemy, but when it's properly
+        // DoD it will only delete the relevant information
+        auto it = std::find_if(idles.begin(), idles.end(),
+                               [enemy_id](const Enemy val) {
+                                   return val.id == enemy_id;
+                               });
+
+        if (it != idles.end())
+        {
+            idles.erase(it);
+            EnemyManager::DeleteEnemy(*it);
+            return;
+        }
+
+        it = std::find_if(chasings.begin(), chasings.end(),
+                          [enemy_id](const Enemy val) {
+                              return val.id == enemy_id;
+                          });
+
+        if (it != chasings.end())
+        {
+            chasings.erase(it);
+            EnemyManager::DeleteEnemy(*it);
+            return;
+        }
     }
 
     void UpdateStates(float deltaTime, Player &player)
