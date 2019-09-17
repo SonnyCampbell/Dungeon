@@ -37,7 +37,7 @@ SDL_Surface *gScreenSurface = NULL;
 Player player = {};
 std::vector<Enemy> enemies = std::vector<Enemy>();
 auto enemy_states = FSMTableState::StateMachineData();
-auto enemy_sprites = std::vector<AnimatedSprite *>();
+auto enemy_sprites = std::vector<AnimatedSprite>();
 
 bool init()
 {
@@ -284,9 +284,9 @@ int main(int argc, char *args[])
         enemy_states.UpdateStates(Game::tick_delta(), player);
 
         auto all_enemy_states = enemy_states.AllEnemies();
-        for (int i = 0; i < enemies.size(); i++)
+        for (int i = 0; i < enemy_sprites.size(); i++)
         {
-            UpdateEnemy(enemies[i], player);
+            UpdateEnemy(enemy_sprites[i], player);
         }
 
         for (auto enemy_rb : all_enemy_states)
@@ -335,15 +335,16 @@ int main(int argc, char *args[])
         }
 
         render(gRenderer, gSpriteSheetTexture, loader);
-        for (auto &enemy : enemies)
+        for (int i = 0; i < enemy_sprites.size(); i++)
         {
-            auto enemy_rb = std::find_if(all_enemy_states.begin(), all_enemy_states.end(), [enemy](const RigidBody val) { return val.entity_id == enemy.id; });
+            auto id = enemy_sprites[i].entity_id;
+            auto enemy_rb = std::find_if(all_enemy_states.begin(), all_enemy_states.end(), [id](const RigidBody val) { return val.entity_id == id; });
             if (enemy_rb == all_enemy_states.end())
             {
                 continue;
             }
 
-            DrawEnemy(enemy, *enemy_rb);
+            DrawEnemy(enemy_sprites[i], *enemy_rb);
         }
         quad->draw(gRenderer); // Debug Drawing
 

@@ -9,6 +9,5 @@ struct Enemy
 {
     int id;
     EntityStats stats;
-    AnimatedSprite *sprite;
     Weapon *weapon;
 };

@@ -4,7 +4,7 @@ using namespace AnimatedSpriteManager;
 
 namespace EnemyManager
 {
-Enemy NewEnemy1(SDL_Renderer **renderer, FSMTableState::StateMachineData &rb_states, std::vector<AnimatedSprite *> &sprites,
+Enemy NewEnemy1(SDL_Renderer **renderer, FSMTableState::StateMachineData &rb_states, std::vector<AnimatedSprite> &sprites,
                 Vec2 position, float speed)
 {
     Vec2 frameSize = {16, 16}; //TODO Constants - Spritesheet frame width/height ---- ^ also --16:28 is default
@@ -19,9 +19,9 @@ Enemy NewEnemy1(SDL_Renderer **renderer, FSMTableState::StateMachineData &rb_sta
     rb_states.idles.push_back(rb);
 
     auto sprite = NewAnimatedSprite(renderer, id, "assets/DungeonTilesetV2.png", animations, IdleUp);
-    sprites.push_back(sprite);
+    sprites.push_back(*sprite);
     EntityStats stats = {100, speed};
-    Enemy *enemy = new Enemy{id, stats, sprite, nullptr};
+    Enemy *enemy = new Enemy{id, stats, nullptr};
 
     return *enemy;
 }
@@ -48,16 +48,16 @@ void TakeDamage(Enemy &enemy, int damage)
     printf("OW! Health: %i \n", enemy.stats.health);
 }
 
-void UpdateEnemy(Enemy &enemy, Player &player)
+void UpdateEnemy(AnimatedSprite &sprite, Player &player)
 {
     //enemy.rb.aabb.center = enemy.rb.aabb.center + (enemy.rb.direction * enemy.rb.speed * Game::tick_delta());
 
-    UpdateAnimation(*enemy.sprite, enemy.sprite->currentAnimationKey);
+    UpdateAnimation(sprite, sprite.currentAnimationKey);
 }
 
-void DrawEnemy(Enemy &enemy, RigidBody rb)
+void DrawEnemy(AnimatedSprite &sprite, RigidBody rb)
 {
     auto camera_position = Vec2(Game::camera.x, Game::camera.y);
-    DrawSprite(*enemy.sprite, rb.aabb.min() - camera_position);
+    DrawSprite(sprite, rb.aabb.min() - camera_position);
 }
 } // namespace EnemyManager
