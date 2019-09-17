@@ -37,6 +37,7 @@ SDL_Surface *gScreenSurface = NULL;
 Player player = {};
 std::vector<Enemy> enemies = std::vector<Enemy>();
 auto enemy_states = FSMTableState::StateMachineData();
+auto enemy_sprites = std::vector<AnimatedSprite *>();
 
 bool init()
 {
@@ -259,9 +260,9 @@ int main(int argc, char *args[])
     }
 
     player = NewPlayer(&gRenderer, {100, 100});
-    auto enemy1 = NewEnemy1(&gRenderer, {100, 180});
-    //enemies.push_back(enemy1);
-    enemy_states.idles.push_back(enemy1);
+    auto enemy1 = NewEnemy1(&gRenderer, enemy_states, enemy_sprites, {100, 180});
+    enemies.push_back(enemy1);
+    //enemy_states.idles.push_back(enemy1);
 
     QuadTree *quad = new QuadTree(0, {0, 0, 480, 480});
 
@@ -282,11 +283,15 @@ int main(int argc, char *args[])
         Update();
         enemy_states.UpdateStates(Game::tick_delta(), player);
 
-        enemies = enemy_states.AllEnemies();
-        for (auto &enemy : enemies)
+        auto all_enemy_states = enemy_states.AllEnemies();
+        for (int i = 0; i < enemies.size(); i++)
         {
-            UpdateEnemy(enemy, player);
-            quad->insert({enemy.id, enemy.rb.aabb.boundingBox()});
+            UpdateEnemy(enemies[i], player);
+        }
+
+        for (auto enemy_rb : all_enemy_states)
+        {
+            quad->insert({enemy_rb.entity_id, enemy_rb.aabb.boundingBox()});
         }
 
         quad->insert({player.id, player.rb.aabb.boundingBox()});
@@ -332,7 +337,13 @@ int main(int argc, char *args[])
         render(gRenderer, gSpriteSheetTexture, loader);
         for (auto &enemy : enemies)
         {
-            DrawEnemy(enemy);
+            auto enemy_rb = std::find_if(all_enemy_states.begin(), all_enemy_states.end(), [enemy](const RigidBody val) { return val.entity_id == enemy.id; });
+            if (enemy_rb == all_enemy_states.end())
+            {
+                continue;
+            }
+
+            DrawEnemy(enemy, *enemy_rb);
         }
         quad->draw(gRenderer); // Debug Drawing
 

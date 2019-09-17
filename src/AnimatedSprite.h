@@ -10,6 +10,7 @@
 
 struct AnimatedSprite
 {
+    int entity_id;
     LTexture texture;
     std::map<AnimationKey, Animation *> *animations;
     AnimationKey currentAnimationKey;
@@ -19,7 +20,7 @@ struct AnimatedSprite
 
 namespace AnimatedSpriteManager
 {
-AnimatedSprite *NewAnimatedSprite(SDL_Renderer **renderer, std::string texturePath, std::map<AnimationKey, Animation *> *animations, AnimationKey animationKey);
+AnimatedSprite *NewAnimatedSprite(SDL_Renderer **renderer, int entity_id, std::string texturePath, std::map<AnimationKey, Animation *> *animations, AnimationKey animationKey);
 
 void DeleteAnimatedSprite(AnimatedSprite &sprite);
 

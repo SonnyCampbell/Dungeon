@@ -21,9 +21,9 @@ Player NewPlayer(SDL_Renderer **renderer, Vec2 position, float speed)
                                                                 {WalkLeft, new Animation(4, runFps, frameSize, {192, 36})},
                                                                 {WalkRight, new Animation(4, runFps, frameSize, {192, 36})}});
 
-    auto rb = RigidBody(60.f, 16.f, 20.f, position, speed, Vec2(0, 0));
+    auto rb = RigidBody(0, 60.f, 16.f, 20.f, position, speed, Vec2(0, 0));
 
-    auto sprite = NewAnimatedSprite(renderer, "assets/DungeonTilesetV2.png", animations, WalkUp);
+    auto sprite = NewAnimatedSprite(renderer, 0, "assets/DungeonTilesetV2.png", animations, WalkUp);
 
     auto weapon = createHeavyMace(renderer, rb.aabb.center, 0);
 

@@ -4,7 +4,7 @@
 namespace AnimatedSpriteManager
 {
 
-AnimatedSprite *NewAnimatedSprite(SDL_Renderer **renderer, std::string texturePath, std::map<AnimationKey, Animation *> *animations, AnimationKey animationKey)
+AnimatedSprite *NewAnimatedSprite(SDL_Renderer **renderer, int id, std::string texturePath, std::map<AnimationKey, Animation *> *animations, AnimationKey animationKey)
 {
     auto texture = new LTexture(renderer);
     if (!texture->loadFromFile(texturePath))
@@ -12,7 +12,7 @@ AnimatedSprite *NewAnimatedSprite(SDL_Renderer **renderer, std::string texturePa
         printf("fuck");
     }
 
-    return new AnimatedSprite{*texture, animations, animationKey, true, true};
+    return new AnimatedSprite{id, *texture, animations, animationKey, true, true};
 }
 
 void DeleteAnimatedSprite(AnimatedSprite &sprite)

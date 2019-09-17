@@ -11,7 +11,7 @@ Weapon *NewWeapon(SDL_Renderer **renderer, SDL_Rect clip, Vec2 position, Vec2 of
     {
         printf("fuck");
     }
-    auto rb = RigidBody(0.f, clip.w, clip.h, position, 0.f, Vec2::zero());
+    auto rb = RigidBody(-1, 0.f, clip.w, clip.h, position, 0.f, Vec2::zero());
 
     auto weapon = new Weapon{*texture, rb, offset, clip, current_frame_count};
     weapon->damage = damage;

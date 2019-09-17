@@ -47,6 +47,7 @@ class RigidBody
 {
 private:
 public:
+    int entity_id;
     float mass;
     float inverseMass;
     AABB aabb;
@@ -57,8 +58,9 @@ public:
     {
     }
 
-    RigidBody(float _mass, float width, float height, Vec2 center, float _speed, Vec2 _direction) : aabb(center, Vec2(width / 2.f, height / 2.f))
+    RigidBody(int id, float _mass, float width, float height, Vec2 center, float _speed, Vec2 _direction) : aabb(center, Vec2(width / 2.f, height / 2.f))
     {
+        entity_id = id;
         mass = _mass;
         inverseMass = mass != 0 ? 1.f / mass : 0;
         direction = _direction;

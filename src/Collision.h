@@ -229,7 +229,7 @@ CollisionResponse collisionResponse(float dt, Contact contact)
 
 CollisionResponse innerCollide(TMXTileLayer &tileLayer, TMXTileSet &tileset, RigidBody moveableObject, AABB &tileAABB, TMXTile tile, float dt, int x, int y, SDL_Renderer *renderer)
 {
-    auto tileRb = RigidBody(0.f, tile.getCollisionBoundary().w, tile.getCollisionBoundary().h, tileAABB.center, 0.f, Vec2::zero());
+    auto tileRb = RigidBody(-1, 0.f, tile.getCollisionBoundary().w, tile.getCollisionBoundary().h, tileAABB.center, 0.f, Vec2::zero());
     auto collision_contact = AABBvAABB(moveableObject, tileRb, tile.getCollisionDistance(), x, y, tileLayer);
 
     if (collision_contact.first)

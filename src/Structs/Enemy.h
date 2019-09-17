@@ -10,6 +10,5 @@ struct Enemy
     int id;
     EntityStats stats;
     AnimatedSprite *sprite;
-    RigidBody rb;
     Weapon *weapon;
 };
