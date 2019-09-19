@@ -31,8 +31,6 @@ struct StateMachineData
 
     void DeleteEnemyState(int enemy_id)
     {
-        // For now this deletes the whole enemy, but when it's properly
-        // DoD it will only delete the relevant information
         auto it = std::find_if(idles.begin(), idles.end(),
                                [enemy_id](const RigidBody val) {
                                    return val.entity_id == enemy_id;
@@ -41,7 +39,6 @@ struct StateMachineData
         if (it != idles.end())
         {
             idles.erase(it);
-            //EnemyManager::DeleteEnemy(*it);
             return;
         }
 
@@ -53,7 +50,35 @@ struct StateMachineData
         if (it != chasings.end())
         {
             chasings.erase(it);
-            //EnemyManager::DeleteEnemy(*it);
+            return;
+        }
+    }
+
+    void UpdateEnemyPosition(int enemy_id, int distance, Player &player)
+    {
+        auto it = std::find_if(idles.begin(), idles.end(),
+                               [enemy_id](const RigidBody val) {
+                                   return val.entity_id == enemy_id;
+                               });
+
+        if (it != idles.end())
+        {
+            auto separation_vector = player.rb.aabb.center - it->aabb.center;
+            auto position_update = separation_vector.normalized_vector() * distance;
+            it->aabb.center -= position_update;
+            return;
+        }
+
+        it = std::find_if(chasings.begin(), chasings.end(),
+                          [enemy_id](const RigidBody val) {
+                              return val.entity_id == enemy_id;
+                          });
+
+        if (it != chasings.end())
+        {
+            auto separation_vector = player.rb.aabb.center - it->aabb.center;
+            auto position_update = separation_vector.normalized_vector() * distance;
+            it->aabb.center -= position_update;
             return;
         }
     }

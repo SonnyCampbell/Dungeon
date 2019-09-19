@@ -67,7 +67,6 @@ void DeleteEnemy(Enemy &enemy)
 void TakeDamage(Enemy &enemy, int damage)
 {
     enemy.stats.health -= damage;
-    //enemy.rb.aabb.center += Vec2(5.f, 0.f);
     printf("OW! Health: %i \n", enemy.stats.health);
 }
 

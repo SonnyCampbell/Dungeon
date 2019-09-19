@@ -291,13 +291,15 @@ void CheckColliisions(QuadTree *quad)
 
                 Enemy &hitEnemy = *it;
                 EnemyManager::TakeDamage(hitEnemy, player.weapon->damage);
+                enemy_states.UpdateEnemyPosition(hitEnemy.id, 5, player);
+
                 player.weapon->targets_hit.insert(collision.id);
                 printf("Hit \n");
 
                 if (hitEnemy.stats.health <= 0)
                 {
-                    enemies.erase(it);
-                    killed_enemies.push_back(hitEnemy.id);
+                    //enemies.erase(it);
+                    //killed_enemies.push_back(hitEnemy.id);
                 }
             }
         }
