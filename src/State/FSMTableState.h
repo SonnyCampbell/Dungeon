@@ -69,7 +69,7 @@ struct StateMachineData
             auto separation_vector = player.rb.aabb.center - iter->aabb.center;
             auto dist = separation_vector.length();
 
-            if (dist < 50 && dist > 8)
+            if (dist < 100 && dist > 8)
             {
                 printf("%i taking chase..\n", iter->entity_id);
                 iter->direction = separation_vector.normalized_vector();
@@ -91,7 +91,7 @@ struct StateMachineData
             auto separation_vector = player.rb.aabb.center - iter->aabb.center;
             auto dist = separation_vector.length();
 
-            if (dist >= 50 || dist <= 8)
+            if (dist >= 100 || dist <= 8)
             {
                 printf("%i lost sight..\n", iter->entity_id);
                 iter->direction = Vec2::zero();

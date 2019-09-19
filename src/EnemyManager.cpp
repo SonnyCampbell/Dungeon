@@ -26,6 +26,29 @@ Enemy NewEnemy1(SDL_Renderer **renderer, FSMTableState::StateMachineData &rb_sta
     return *enemy;
 }
 
+void DeleteEnemyById(std::vector<Enemy> &enemies, int id)
+{
+    auto it = std::find_if(enemies.begin(), enemies.end(), [id](const Enemy val) {
+        return val.id == id;
+    });
+
+    if (it == enemies.end())
+        return;
+
+    Enemy &enemy = *it;
+    if (enemy.weapon)
+    {
+        WeaponManager::DeleteWeapon(enemy.weapon);
+    }
+
+    /* if (enemy.sprite)
+    {
+        AnimatedSpriteManager::DeleteAnimatedSprite(*enemy.sprite);
+    } */
+
+    delete &enemy;
+}
+
 void DeleteEnemy(Enemy &enemy)
 {
     if (enemy.weapon)

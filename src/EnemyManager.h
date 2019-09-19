@@ -16,5 +16,6 @@ Enemy NewEnemy1(SDL_Renderer **renderer, FSMTableState::StateMachineData &rb_sta
 void DeleteEnemy(Enemy &enemy);
 void UpdateEnemy(AnimatedSprite &sprite, Player &player);
 void DrawEnemy(AnimatedSprite &sprite, RigidBody rb);
+void DeleteEnemyById(std::vector<Enemy> &enemies, int id);
 void TakeDamage(Enemy &enemy, int damage);
 } // namespace EnemyManager
