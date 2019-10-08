@@ -56,6 +56,7 @@
         "iomanip": "cpp",
         "queue": "cpp",
         "xlocmon": "cpp",
-        "xloctime": "cpp"
+        "xloctime": "cpp",
+        "set": "cpp"
     }
 }

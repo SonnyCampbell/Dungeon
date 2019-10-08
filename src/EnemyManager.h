@@ -12,10 +12,6 @@
 
 namespace EnemyManager
 {
-Enemy NewEnemy1(SDL_Renderer **renderer, FSMTableState::StateMachineData &rb_states, std::vector<AnimatedSprite> &sprites, Vec2 position, float speed = 6.0f);
-void DeleteEnemy(Enemy &enemy);
-void UpdateEnemy(AnimatedSprite &sprite, Player &player);
-void DrawEnemy(AnimatedSprite &sprite, RigidBody rb);
+Enemy NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed = 6.0f);
 void DeleteEnemyById(std::vector<Enemy> &enemies, int id);
-void TakeDamage(Enemy &enemy, int damage);
 } // namespace EnemyManager

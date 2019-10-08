@@ -36,8 +36,8 @@ SDL_Surface *gScreenSurface = NULL;
 
 Player player = {};
 std::vector<Enemy> enemies = std::vector<Enemy>();
-auto enemy_states = FSMTableState::StateMachineData();
-auto enemy_sprites = std::vector<AnimatedSprite>();
+//auto enemy_states = FSMTableState::StateMachineData();
+//auto enemy_sprites = std::vector<AnimatedSprite>();
 
 bool init()
 {
@@ -135,8 +135,7 @@ void close()
     SDL_Quit();
 }
 
-void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader,
-            QuadTree *quad, FSMTableState::EntityRbVector all_enemy_states)
+void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader, QuadTree *quad)
 {
     unsigned int tileID = 0;
 
@@ -176,17 +175,11 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader,
 
     DrawPlayer(player);
 
-    for (int i = 0; i < enemy_sprites.size(); i++)
+    for (auto enemy : enemies)
     {
-        auto id = enemy_sprites[i].entity_id;
-        auto enemy_rb = std::find_if(all_enemy_states.begin(), all_enemy_states.end(), [id](const RigidBody val) { return val.entity_id == id; });
-        if (enemy_rb == all_enemy_states.end())
-        {
-            continue;
-        }
-
-        DrawEnemy(enemy_sprites[i], *enemy_rb);
+        enemy.draw();
     }
+
     quad->draw(gRenderer); // Debug Drawing
 
     for (auto debug_rect : Game::debug_rects)
@@ -200,11 +193,87 @@ void render(SDL_Renderer *renderer, LTexture &texture, TMXLoader *loader,
 
 void UpdateEnemies()
 {
-    enemy_states.UpdateStates(Game::tick_delta(), player);
+    //enemy_states.UpdateStates(Game::tick_delta(), player);
 
-    for (int i = 0; i < enemy_sprites.size(); i++)
+    // for (int i = 0; i < enemy_sprites.size(); i++)
+    // {
+    //     UpdateEnemy(enemy_sprites[i], player);
+    // }
+
+    std::vector<Enemy *> pendingChase = std::vector<Enemy *>();
+    std::vector<Enemy *> pendingIdle = std::vector<Enemy *>();
+    std::vector<Enemy *> pendingAttack = std::vector<Enemy *>();
+
+    for (auto iter = enemies.begin(); iter != enemies.end();)
     {
-        UpdateEnemy(enemy_sprites[i], player);
+        auto separation_vector = player.rb.aabb.center - iter->rb.aabb.center;
+        auto dist = separation_vector.length();
+        switch (iter->state)
+        {
+        case EnemyState1::idle:
+            if (dist < 100 && dist > 8)
+            {
+                printf("%i taking chase..\n", iter->id);
+                iter->rb.direction = separation_vector.normalized_vector();
+
+                iter->rb.aabb.center = iter->rb.aabb.center + (iter->rb.direction * iter->rb.speed * Game::tick_delta());
+                pendingChase.push_back(&*iter);
+                ++iter;
+            }
+            else
+            {
+                ++iter;
+            }
+            break;
+
+        case EnemyState1::chasing:
+            if (dist >= 100)
+            {
+                printf("%i lost sight..\n", iter->id);
+                iter->rb.direction = Vec2::zero();
+                pendingIdle.push_back(&*iter);
+                ++iter;
+            }
+            else if (dist < 20)
+            {
+                printf("%i attacking player \n", iter->id);
+                iter->rb.direction = Vec2::zero();
+                pendingAttack.push_back(&*iter);
+                ++iter;
+            }
+            else
+            {
+                iter->rb.direction = separation_vector.normalized_vector();
+                iter->rb.aabb.center = iter->rb.aabb.center + (iter->rb.direction * iter->rb.speed * Game::tick_delta());
+                ++iter;
+            }
+            break;
+        case EnemyState1::attacking:
+            printf("Readying attack \n");
+            ++iter;
+            break;
+        }
+    }
+
+    for (auto enemy : pendingChase)
+    {
+        enemy->state = EnemyState1::chasing;
+        //enemy.update();
+    }
+
+    for (auto enemy : pendingIdle)
+    {
+        enemy->state = EnemyState1::idle;
+    }
+
+    for (auto enemy : pendingAttack)
+    {
+        enemy->state = EnemyState1::attacking;
+    }
+
+    for (auto enemy : enemies)
+    {
+        enemy.update();
     }
 }
 
@@ -256,11 +325,11 @@ void Update()
     UpdateEnemies();
 }
 
-void BuildQuadTree(QuadTree *quad, FSMTableState::EntityRbVector all_enemy_states)
+void BuildQuadTree(QuadTree *quad, std::vector<Enemy> enemies)
 {
-    for (auto enemy_rb : all_enemy_states)
+    for (auto enemy : enemies)
     {
-        quad->insert({enemy_rb.entity_id, enemy_rb.aabb.boundingBox()});
+        quad->insert({enemy.id, enemy.rb.aabb.boundingBox()});
     }
 
     quad->insert({player.id, player.rb.aabb.boundingBox()});
@@ -290,8 +359,8 @@ void CheckColliisions(QuadTree *quad)
                     continue;
 
                 Enemy &hitEnemy = *it;
-                EnemyManager::TakeDamage(hitEnemy, player.weapon->damage);
-                enemy_states.UpdateEnemyPosition(hitEnemy.id, 5, player);
+                hitEnemy.takeDamage(player.weapon->damage);
+                //enemy_states.UpdateEnemyPosition(hitEnemy.id, 5, player);
 
                 player.weapon->targets_hit.insert(collision.id);
                 printf("Hit \n");
@@ -307,11 +376,11 @@ void CheckColliisions(QuadTree *quad)
 
     for (auto id : killed_enemies)
     {
-        enemy_states.DeleteEnemyState(id);
-        enemy_sprites.erase(std::remove_if(enemy_sprites.begin(), enemy_sprites.end(), [id](const AnimatedSprite val) {
-                                return id == val.entity_id;
-                            }),
-                            enemy_sprites.end());
+        //enemy_states.DeleteEnemyState(id);
+        // enemy_sprites.erase(std::remove_if(enemy_sprites.begin(), enemy_sprites.end(), [id](const AnimatedSprite val) {
+        //                         return id == val.entity_id;
+        //                     }),
+        //                     enemy_sprites.end());
         EnemyManager::DeleteEnemyById(enemies, id);
     }
 }
@@ -355,7 +424,7 @@ int main(int argc, char *args[])
     }
 
     player = NewPlayer(&gRenderer, {100, 100});
-    auto enemy1 = NewEnemy1(&gRenderer, enemy_states, enemy_sprites, {100, 180});
+    auto enemy1 = NewEnemy1(&gRenderer, {100, 180});
     enemies.push_back(enemy1);
     //enemy_states.idles.push_back(enemy1);
 
@@ -377,11 +446,11 @@ int main(int argc, char *args[])
         HandleInput(event, quit);
         Update();
 
-        BuildQuadTree(quad, enemy_states.AllEnemies());
+        BuildQuadTree(quad, enemies);
 
         CheckColliisions(quad);
 
-        render(gRenderer, gSpriteSheetTexture, loader, quad, enemy_states.AllEnemies());
+        render(gRenderer, gSpriteSheetTexture, loader, quad);
 
         //Update screen
         SDL_RenderPresent(gRenderer);
