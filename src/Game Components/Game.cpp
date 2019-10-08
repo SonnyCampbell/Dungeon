@@ -9,7 +9,7 @@ int Game::last_tick = 0;
 
 float Game::tick_delta()
 {
-    return (current_tick - last_tick) / 1000.0f;
+    return (current_tick - last_tick) / 1000.0f; //TODO Remove calculation
 }
 
 int Game::screen_width = 600;
