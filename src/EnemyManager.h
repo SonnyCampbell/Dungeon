@@ -13,6 +13,6 @@
 
 namespace EnemyManager
 {
-Enemy NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed = 6.0f);
+Enemy NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed = 15.0f);
 void DeleteEnemyById(std::vector<Enemy> &enemies, int id);
 } // namespace EnemyManager

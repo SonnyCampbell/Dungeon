@@ -20,7 +20,7 @@ void Enemy::update()
 void Enemy::takeDamage(int damage)
 {
     stats.health -= damage;
-    printf("OW! Health: %i \n", stats.health);
+    printf("%i OW! Health: %i \n", this->id, stats.health);
 }
 
 void Enemy::takeHit(int distance, Vec2 &srcPosition)

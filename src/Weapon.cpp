@@ -62,7 +62,7 @@ void UpdateWeapon(Weapon &weapon, Vec2 center)
 
 Vec2 GetWeaponPosition(Weapon &weapon, Vec2 camera_position, int frame, bool facingRight)
 {
-    auto position = weapon.rb.aabb.center - camera_position;
+    auto position = weapon.rb.aabb.center;
     if (!weapon.isAttacking)
     {
         if (weapon.current_frame != frame)
@@ -96,30 +96,33 @@ Vec2 GetWeaponPosition(Weapon &weapon, Vec2 camera_position, int frame, bool fac
 void DrawWeapon(Weapon &weapon, Vec2 camera_position, int frame, bool facingRight)
 {
     auto position = GetWeaponPosition(weapon, camera_position, frame, facingRight);
+    auto render_position = position - camera_position;
     if (!weapon.isAttacking)
     {
 
         if (facingRight)
         {
-            weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, 90.f, NULL, SDL_FLIP_NONE);
+            weapon.texture.renderF(render_position.x(), render_position.y(), &weapon.spritesheet_clip, 90.f, NULL, SDL_FLIP_NONE);
 
             Vec2 collision_offset = {7, 8};
             weapon.collision_box = {(int)(position.x() + collision_offset.x()), (int)(position.y() + collision_offset.y()), 11, 11};
+            auto render_collision_box = SDL_Rect{(int)(render_position.x() + collision_offset.x()), (int)(render_position.y() + collision_offset.y()), 11, 11};
             SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-            SDL_RenderDrawRect(*weapon.texture.gRenderer, &weapon.collision_box);
+            SDL_RenderDrawRect(*weapon.texture.gRenderer, &render_collision_box);
             SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0xFF, 0x00, 0xFF);
-            SDL_RenderDrawPointF(*weapon.texture.gRenderer, position.x(), position.y());
+            SDL_RenderDrawPointF(*weapon.texture.gRenderer, render_position.x(), render_position.y());
         }
         else
         {
-            weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, -90.f, NULL, SDL_FLIP_NONE);
+            weapon.texture.renderF(render_position.x(), render_position.y(), &weapon.spritesheet_clip, -90.f, NULL, SDL_FLIP_NONE);
 
             Vec2 collision_offset = {7, 8};
             weapon.collision_box = {(int)(position.x() - weapon.offset.x() + collision_offset.x()), (int)(position.y() + collision_offset.y()), 11, 11};
+            auto render_collision_box = SDL_Rect{(int)(render_position.x() - weapon.offset.x() + collision_offset.x()), (int)(render_position.y() + collision_offset.y()), 11, 11};
             SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-            SDL_RenderDrawRect(*weapon.texture.gRenderer, &weapon.collision_box);
+            SDL_RenderDrawRect(*weapon.texture.gRenderer, &render_collision_box);
             SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0xFF, 0x00, 0xFF);
-            SDL_RenderDrawPointF(*weapon.texture.gRenderer, position.x(), position.y());
+            SDL_RenderDrawPointF(*weapon.texture.gRenderer, render_position.x(), render_position.y());
         }
 
         weapon.current_frame = frame;
@@ -129,21 +132,23 @@ void DrawWeapon(Weapon &weapon, Vec2 camera_position, int frame, bool facingRigh
         auto attack = weapon.basic_attack_framse[weapon.current_attack_frame];
         if (facingRight)
         {
-            weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, attack.angle, NULL, SDL_FLIP_NONE);
+            weapon.texture.renderF(render_position.x(), render_position.y(), &weapon.spritesheet_clip, attack.angle, NULL, SDL_FLIP_NONE);
             weapon.collision_box = {(int)(position.x() + attack.attack_collision_offset.x()), (int)(position.y() + attack.attack_collision_offset.y()), 11, 11};
+            auto render_collision_box = SDL_Rect{(int)(render_position.x() + attack.attack_collision_offset.x()), (int)(render_position.y() + attack.attack_collision_offset.y()), 11, 11};
             SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-            SDL_RenderDrawRect(*weapon.texture.gRenderer, &weapon.collision_box);
+            SDL_RenderDrawRect(*weapon.texture.gRenderer, &render_collision_box);
             SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0xFF, 0x00, 0xFF);
-            SDL_RenderDrawPointF(*weapon.texture.gRenderer, position.x(), position.y());
+            SDL_RenderDrawPointF(*weapon.texture.gRenderer, render_position.x(), render_position.y());
         }
         else
         {
-            weapon.texture.renderF(position.x(), position.y(), &weapon.spritesheet_clip, -attack.angle, NULL, SDL_FLIP_NONE);
+            weapon.texture.renderF(render_position.x(), render_position.y(), &weapon.spritesheet_clip, -attack.angle, NULL, SDL_FLIP_NONE);
             weapon.collision_box = {(int)(position.x() + attack.attack_collision_offset.x()), (int)(position.y() + attack.attack_collision_offset.y()), 11, 11};
+            auto render_collision_box = SDL_Rect{(int)(render_position.x() + attack.attack_collision_offset.x()), (int)(render_position.y() + attack.attack_collision_offset.y()), 11, 11};
             SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-            SDL_RenderDrawRect(*weapon.texture.gRenderer, &weapon.collision_box);
+            SDL_RenderDrawRect(*weapon.texture.gRenderer, &render_collision_box);
             SDL_SetRenderDrawColor(*weapon.texture.gRenderer, 0x00, 0xFF, 0x00, 0xFF);
-            SDL_RenderDrawPointF(*weapon.texture.gRenderer, position.x(), position.y());
+            SDL_RenderDrawPointF(*weapon.texture.gRenderer, render_position.x(), render_position.y());
         }
     }
 

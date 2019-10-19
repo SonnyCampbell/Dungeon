@@ -375,7 +375,7 @@ void CheckColliisions(QuadTree *quad)
 
                 Enemy &hitEnemy = *it;
                 hitEnemy.takeDamage(player.weapon->damage);
-                hitEnemy.takeHit(5, player.rb.aabb.center);
+                hitEnemy.takeHit(15, player.rb.aabb.center);
 
                 player.weapon->targets_hit.insert(collision.id);
 
@@ -433,10 +433,12 @@ int main(int argc, char *args[])
     }
 
     player = NewPlayer(&gRenderer, {100, 100});
-    auto enemy1 = NewEnemy1(&gRenderer, {100, 180});
-    enemies.push_back(enemy1);
+    enemies.push_back(NewEnemy1(&gRenderer, {100, 180}));
+    enemies.push_back(NewEnemy1(&gRenderer, {200, 180}));
+    enemies.push_back(NewEnemy1(&gRenderer, {100, 280}));
+    enemies.push_back(NewEnemy1(&gRenderer, {200, 280}));
 
-    QuadTree *quad = new QuadTree(0, {0, 0, 480, 480});
+    QuadTree *quad = new QuadTree(0, {0, 0, 600, 600});
 
     int totalFrames = 0;
     bool quit = false;
@@ -454,7 +456,7 @@ int main(int argc, char *args[])
         HandleInput(event, quit);
         Update();
 
-        //BuildQuadTree(quad, enemies);
+        BuildQuadTree(quad, enemies);
 
         CheckColliisions(quad);
 

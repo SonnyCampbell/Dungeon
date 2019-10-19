@@ -41,6 +41,11 @@ public:
     {
         return {(int)min().x(), (int)min().y(), (int)halfExtents.x() * 2, (int)halfExtents.y() * 2};
     }
+
+    SDL_FRect boundingBoxF()
+    {
+        return {min().x(), min().y(), halfExtents.x() * 2, halfExtents.y() * 2};
+    }
 };
 
 class RigidBody

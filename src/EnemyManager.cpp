@@ -15,10 +15,8 @@ Enemy NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed)
          {WalkUp, new Animation(4, runFps, frameSize, {370, 37})}});
     int id = Game::NextEntityId();
     auto rb = new RigidBody(id, 60.f, 12.f, 12.f, position, speed, Vec2(0, 0));
-    //rb_states.idles.push_back(rb);
 
     auto sprite = NewAnimatedSprite(renderer, id, "assets/DungeonTilesetV2.png", animations, IdleUp);
-    //sprites.push_back(*sprite);
     EntityStats stats = {100, speed};
     Enemy *enemy = new Enemy{id, stats, nullptr, sprite, *rb};
 
