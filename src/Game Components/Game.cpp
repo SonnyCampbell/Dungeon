@@ -22,8 +22,8 @@ SDL_Rect Game::camera = SDL_Rect{100, 100, screen_width, screen_height};
 void Game::UpdateCamera(Vec2 player_position)
 {
     //Center the camera over the dot
-    camera.x = (player_position.x()) - screen_width / 2;
-    camera.y = (player_position.y()) - screen_height / 2;
+    camera.x = (player_position.x()) - screen_width / (2 * render_scale);
+    camera.y = (player_position.y()) - screen_height / (2 * render_scale);
 
     //Keep the camera in bounds
     if (camera.x < 0)
