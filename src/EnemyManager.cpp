@@ -6,15 +6,15 @@ namespace EnemyManager
 {
 Enemy NewEnemy1(SDL_Renderer **renderer, Vec2 position, float speed)
 {
-    Vec2 frameSize = {16, 16}; //TODO Constants - Spritesheet frame width/height ---- ^ also --16:28 is default
+    Vec2 frameSize = {16, 15}; //TODO Constants - Spritesheet frame width/height ---- ^ also --16:28 is default
     int runFps = 10;
     int idleFps = 5;
 
     auto *animations = new std::map<AnimationKey, Animation *>(
-        {{IdleUp, new Animation(4, idleFps, frameSize, {369, 35})},
-         {WalkUp, new Animation(4, runFps, frameSize, {369, 35})}});
+        {{IdleUp, new Animation(4, idleFps, frameSize, {370, 37})},
+         {WalkUp, new Animation(4, runFps, frameSize, {370, 37})}});
     int id = Game::NextEntityId();
-    auto rb = new RigidBody(id, 60.f, 16.f, 20.f, position, speed, Vec2(0, 0));
+    auto rb = new RigidBody(id, 60.f, 12.f, 12.f, position, speed, Vec2(0, 0));
     //rb_states.idles.push_back(rb);
 
     auto sprite = NewAnimatedSprite(renderer, id, "assets/DungeonTilesetV2.png", animations, IdleUp);

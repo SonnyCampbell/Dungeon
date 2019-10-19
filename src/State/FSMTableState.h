@@ -2,7 +2,7 @@
 #include <vector>
 #include "../Vec2.h"
 #include "../Player.h"
-#include "../Structs/Enemy.h"
+#include "../Enemies/Enemy.h"
 #include "../EnemyManager.h"
 
 namespace FSMTableState

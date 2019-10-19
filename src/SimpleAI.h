@@ -1,6 +1,6 @@
 #pragma once
 #include "EnemyManager.h"
-#include "Structs/Enemy.h"
+#include "Enemies/Enemy.h"
 #include "Player.h"
 #include "Vec2.h"
 #include "State/EnemyIdleState.h"

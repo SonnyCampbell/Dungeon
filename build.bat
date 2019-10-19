@@ -6,7 +6,7 @@ C:/"Program Files (x86)"/"Microsoft Visual Studio"/2019/Community/VC/Tools/MSVC/
 ../src/program.cpp ../src/TMXLoader/TMXLoader.cpp ../src/TMXLoader/TMXMap.cpp ../src/TMXLoader/TMXTile.cpp ^
 ../src/TMXLoader/TMXTileLayer.cpp ../src/TMXLoader/TMXTileSet.cpp ../src/"Game Components"/Game.cpp ../src/Player.cpp ^
 ../src/EnemyManager.cpp ../src/LTexture.cpp ../src/Weapon.cpp ../src/AnimatedSprite.cpp ../src/SimpleAI.cpp ^
-../src/State/EnemyIdleState.cpp ../src/State/EnemyChaseState.cpp ../src/Structs/Enemy.cpp ^
+../src/State/EnemyIdleState.cpp ../src/State/EnemyChaseState.cpp ../src/Enemies/Enemy.cpp ^
 /I "C:\Program Files (x86)\Windows Kits\10\Include\10.0.17763.0\ucrt" ^
 /I C:/code/Projects/libraries/SDL2-2.0.10/include ^
 /I C:/code/Projects/libraries/SDL2_image-2.0.5/include ^

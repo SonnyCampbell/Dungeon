@@ -11,7 +11,7 @@
 #include "AnimationKey.h"
 #include "Player.h"
 #include "EnemyManager.h"
-#include "Structs/Enemy.h"
+#include "Enemies/Enemy.h"
 #include "TMXLoader/TMXLoader.h"
 #include "Collision.h"
 #include "QuadTree.h"
@@ -202,55 +202,65 @@ void UpdateEnemies()
 
     std::vector<Enemy *> pendingChase = std::vector<Enemy *>();
     std::vector<Enemy *> pendingIdle = std::vector<Enemy *>();
+    std::vector<Enemy *> pendingReadyAttack = std::vector<Enemy *>();
     std::vector<Enemy *> pendingAttack = std::vector<Enemy *>();
 
-    for (auto iter = enemies.begin(); iter != enemies.end();)
+    for (auto enemy = enemies.begin(); enemy != enemies.end();)
     {
-        auto separation_vector = player.rb.aabb.center - iter->rb.aabb.center;
+        auto separation_vector = player.rb.aabb.center - enemy->rb.aabb.center;
         auto dist = separation_vector.length();
-        switch (iter->state)
+        switch (enemy->state)
         {
         case EnemyState1::idle:
-            if (dist < 100 && dist > 8)
+            if (dist < 100 && dist > 8 && (Game::current_tick - enemy->attack.most_recent_attack_time > 1000))
             {
-                printf("%i taking chase..\n", iter->id);
-                iter->rb.direction = separation_vector.normalized_vector();
+                printf("%i taking chase..\n", enemy->id);
+                enemy->rb.direction = separation_vector.normalized_vector();
 
-                iter->rb.aabb.center = iter->rb.aabb.center + (iter->rb.direction * iter->rb.speed * Game::tick_delta());
-                pendingChase.push_back(&*iter);
-                ++iter;
+                enemy->rb.aabb.center = enemy->rb.aabb.center + (enemy->rb.direction * enemy->rb.speed * Game::tick_delta());
+                pendingChase.push_back(&*enemy);
             }
-            else
-            {
-                ++iter;
-            }
+
+            ++enemy;
+
             break;
 
         case EnemyState1::chasing:
             if (dist >= 100)
             {
-                printf("%i lost sight..\n", iter->id);
-                iter->rb.direction = Vec2::zero();
-                pendingIdle.push_back(&*iter);
-                ++iter;
+                printf("%i lost sight..\n", enemy->id);
+                enemy->rb.direction = Vec2::zero();
+                pendingIdle.push_back(&*enemy);
+                ++enemy;
             }
             else if (dist < 20)
             {
-                printf("%i attacking player \n", iter->id);
-                iter->rb.direction = Vec2::zero();
-                pendingAttack.push_back(&*iter);
-                ++iter;
+                printf("%i attacking player \n", enemy->id);
+                enemy->rb.direction = Vec2::zero();
+                enemy->beginAttack(player);
+                pendingReadyAttack.push_back(&*enemy);
+                ++enemy;
             }
             else
             {
-                iter->rb.direction = separation_vector.normalized_vector();
-                iter->rb.aabb.center = iter->rb.aabb.center + (iter->rb.direction * iter->rb.speed * Game::tick_delta());
-                ++iter;
+                enemy->rb.direction = separation_vector.normalized_vector();
+                enemy->rb.aabb.center = enemy->rb.aabb.center + (enemy->rb.direction * enemy->rb.speed * Game::tick_delta());
+                ++enemy;
             }
             break;
+        case EnemyState1::readying_attack:
+            enemy->continueAttack(player);
+            if (!enemy->attack.readying_attack)
+            {
+                pendingAttack.push_back(&*enemy);
+            }
+            ++enemy;
+            break;
         case EnemyState1::attacking:
-            printf("Readying attack \n");
-            ++iter;
+            enemy->finishAttack(player);
+            pendingIdle.push_back(&*enemy);
+            enemy->attack.most_recent_attack_time = Game::current_tick;
+            ++enemy;
             break;
         }
     }
@@ -264,6 +274,11 @@ void UpdateEnemies()
     for (auto enemy : pendingIdle)
     {
         enemy->state = EnemyState1::idle;
+    }
+
+    for (auto enemy : pendingReadyAttack)
+    {
+        enemy->state = EnemyState1::readying_attack;
     }
 
     for (auto enemy : pendingAttack)
@@ -360,10 +375,9 @@ void CheckColliisions(QuadTree *quad)
 
                 Enemy &hitEnemy = *it;
                 hitEnemy.takeDamage(player.weapon->damage);
-                //enemy_states.UpdateEnemyPosition(hitEnemy.id, 5, player);
+                hitEnemy.takeHit(5, player.rb.aabb.center);
 
                 player.weapon->targets_hit.insert(collision.id);
-                printf("Hit \n");
 
                 if (hitEnemy.stats.health <= 0)
                 {
@@ -376,11 +390,6 @@ void CheckColliisions(QuadTree *quad)
 
     for (auto id : killed_enemies)
     {
-        //enemy_states.DeleteEnemyState(id);
-        // enemy_sprites.erase(std::remove_if(enemy_sprites.begin(), enemy_sprites.end(), [id](const AnimatedSprite val) {
-        //                         return id == val.entity_id;
-        //                     }),
-        //                     enemy_sprites.end());
         EnemyManager::DeleteEnemyById(enemies, id);
     }
 }
@@ -426,7 +435,6 @@ int main(int argc, char *args[])
     player = NewPlayer(&gRenderer, {100, 100});
     auto enemy1 = NewEnemy1(&gRenderer, {100, 180});
     enemies.push_back(enemy1);
-    //enemy_states.idles.push_back(enemy1);
 
     QuadTree *quad = new QuadTree(0, {0, 0, 480, 480});
 
@@ -446,7 +454,7 @@ int main(int argc, char *args[])
         HandleInput(event, quit);
         Update();
 
-        BuildQuadTree(quad, enemies);
+        //BuildQuadTree(quad, enemies);
 
         CheckColliisions(quad);
 
