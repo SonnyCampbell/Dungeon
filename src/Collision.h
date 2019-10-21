@@ -118,6 +118,26 @@ bool checkBoxCollision(SDL_Rect a, SDL_Rect b)
     return true;
 }
 
+std::pair<bool, Contact> entityAABBvAABB(RigidBody a, RigidBody b, int collision_distance)
+{
+    auto combined_extents = a.aabb.halfExtents + b.aabb.halfExtents;
+    auto delta = b.aabb.center - a.aabb.center;
+
+    auto normal = -delta.major_axis();
+    auto plane_center = (normal * combined_extents) + b.aabb.center;
+
+    auto plane_delta = a.aabb.center - plane_center;
+    auto dist = Vec2::dot_product(plane_delta, normal);
+
+    if (dist < collision_distance)
+    {
+        auto contact = Contact(a, b, normal, dist, 0.f);
+        return std::pair<bool, Contact>(true, contact);
+    }
+
+    return std::pair<bool, Contact>(false, Contact());
+}
+
 std::pair<bool, Contact> AABBvAABB(RigidBody a, RigidBody b, int collision_distance, unsigned int tileX, unsigned int tileY, TMXTileLayer &layer)
 {
     auto combined_extents = a.aabb.halfExtents + b.aabb.halfExtents;
@@ -240,6 +260,17 @@ CollisionResponse innerCollide(TMXTileLayer &tileLayer, TMXTileSet &tileset, Rig
     return CollisionResponse();
 }
 
+CollisionResponse entityCollide(RigidBody entity1, RigidBody entity2)
+{
+    auto collision_contact = entityAABBvAABB(entity1, entity2, 2);
+    if (collision_contact.first)
+    {
+        return collisionResponse(2, collision_contact.second);
+    }
+
+    return CollisionResponse();
+}
+
 std::vector<CollisionResponse> collision(TMXTileLayer &tileLayer, TMXTileSet &tileset, RigidBody rb, float dt, SDL_Renderer *renderer)
 {
     auto expand = Vec2(0.f, 0.f);
@@ -292,6 +323,29 @@ std::vector<CollisionResponse> collision(TMXTileLayer &tileLayer, TMXTileSet &ti
     }
 
     return collisionResponses;
+}
+
+Vec2 getCollisionCorrectedDirection(RigidBody rb, CollisionResponse collision)
+{
+    auto collision_vector = Vec2(0, 0);
+
+    auto collision_normal = collision.contact.normal;
+    if ((collision_normal.x() > 0.f && rb.direction.x() < 0.f) || (collision_normal.x() < 0.f && rb.direction.x() > 0.f))
+    {
+        collision_vector = Vec2(1.f, collision_vector.y());
+    }
+    if ((collision_normal.y() > 0.f && rb.direction.y() < 0.f) || (collision_normal.y() < 0.f && rb.direction.y() > 0.f))
+    {
+        collision_vector = Vec2(collision_vector.x(), 1.f);
+    }
+
+    Vec2 currentDirection = Vec2(rb.direction.x(), rb.direction.y());
+    currentDirection.normalize();
+    auto collision_corrected_direction =
+        Vec2(currentDirection.x() - (currentDirection.x() * collision_vector.x()),
+             currentDirection.y() - (currentDirection.y() * collision_vector.y()));
+
+    return collision_corrected_direction;
 }
 
 } // namespace Collision

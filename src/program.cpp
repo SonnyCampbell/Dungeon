@@ -214,11 +214,11 @@ void UpdateEnemies()
         case EnemyState1::idle:
             if (dist < 100 && dist > 8 && (Game::current_tick - enemy->attack.most_recent_attack_time > 1000))
             {
-                printf("%i taking chase..\n", enemy->id);
+                //printf("%i taking chase..\n", enemy->id);
                 enemy->rb.direction = separation_vector.normalized_vector();
 
-                enemy->rb.aabb.center = enemy->rb.aabb.center + (enemy->rb.direction * enemy->rb.speed * Game::tick_delta());
-                pendingChase.push_back(&*enemy);
+                // enemy->rb.aabb.center = enemy->rb.aabb.center + (enemy->rb.direction * enemy->rb.speed * Game::tick_delta());
+                //pendingChase.push_back(&*enemy);
             }
 
             ++enemy;
@@ -292,73 +292,35 @@ void UpdateEnemies()
     }
 }
 
-void Update()
+bool CheckEnemyCollisions(QuadTree *quad)
 {
-    UpdatePlayer(player);
-    auto collision_layer = map1->getTileLayers()->at(2);
-    auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player.rb, Game::tick_delta(), gRenderer);
-
-    if (collisions.size() > 0)
-    {
-        auto collision_vector = Vec2(0, 0);
-
-        for (int i = 0; i < collisions.size(); i++)
-        {
-            auto collision_normal = collisions[i].contact.normal;
-            if ((collision_normal.x() > 0.f && player.rb.direction.x() < 0.f) || (collision_normal.x() < 0.f && player.rb.direction.x() > 0.f))
-            {
-                collision_vector = Vec2(1.f, collision_vector.y());
-                //player.rb.direction = Vec2(0.f, player.rb.direction.y());
-            }
-            if ((collision_normal.y() > 0.f && player.rb.direction.y() < 0.f) || (collision_normal.y() < 0.f && player.rb.direction.y() > 0.f))
-            {
-                collision_vector = Vec2(collision_vector.x(), 1.f);
-                //player.rb.direction = Vec2(player.rb.direction.x(), 0.f);
-            }
-        }
-
-        Vec2 currentDirection = Vec2(player.rb.direction.x(), player.rb.direction.y());
-        currentDirection.normalize();
-        auto collision_corrected_direction =
-            Vec2(currentDirection.x() - (currentDirection.x() * collision_vector.x()),
-                 currentDirection.y() - (currentDirection.y() * collision_vector.y()));
-
-        player.rb.aabb.center = player.rb.aabb.center + (collision_corrected_direction * player.rb.speed * Game::tick_delta());
-
-        Game::UpdateCamera(player.rb.aabb.center);
-
-        UpdateEnemies();
-
-        return;
-    }
-
-    Vec2 currentDirection = Vec2(player.rb.direction.x(), player.rb.direction.y());
-    currentDirection.normalize();
-    player.rb.aabb.center = player.rb.aabb.center + (currentDirection * player.rb.speed * Game::tick_delta());
-
-    Game::UpdateCamera(player.rb.aabb.center);
-    UpdateEnemies();
-}
-
-void BuildQuadTree(QuadTree *quad, std::vector<Enemy> enemies)
-{
-    for (auto enemy : enemies)
-    {
-        quad->insert({enemy.id, enemy.rb.aabb.boundingBox()});
-    }
-
-    quad->insert({player.id, player.rb.aabb.boundingBox()});
-}
-
-void CheckColliisions(QuadTree *quad)
-{
+    bool enemyCollision = false;
     std::vector<int> killed_enemies = std::vector<int>();
     std::vector<QuadCollionObject> possible_collisions = std::vector<QuadCollionObject>();
     quad->retrieve(possible_collisions, {player.id, player.rb.aabb.boundingBox()});
     for (auto &collision : possible_collisions)
     {
         if (collision.id == player.id)
+        {
             continue;
+        }
+
+        auto it1 = std::find_if(enemies.begin(), enemies.end(),
+                                [collision](const Enemy val) {
+                                    return val.id == collision.id;
+                                });
+
+        if (it1 == enemies.end())
+            continue;
+
+        auto test = Collision::entityCollide(player.rb, it1->rb);
+        if (test.collision)
+        {
+            auto correction = Collision::getCollisionCorrectedDirection(player.rb, test);
+            player.rb.aabb.center = player.rb.aabb.center + (correction * player.rb.speed * Game::tick_delta());
+            printf("bump \n");
+            enemyCollision = true;
+        }
 
         if (player.weapon->isAttacking && player.weapon->targets_hit.find(collision.id) == player.weapon->targets_hit.end())
         {
@@ -392,6 +354,74 @@ void CheckColliisions(QuadTree *quad)
     {
         EnemyManager::DeleteEnemyById(enemies, id);
     }
+
+    return enemyCollision;
+}
+
+void Update(QuadTree *quad)
+{
+    UpdatePlayer(player);
+    auto collision_layer = map1->getTileLayers()->at(2);
+    auto collisions = Collision::collision(collision_layer, *map1->getTileSet("16bit Dungeon Tiles II"), player.rb, Game::tick_delta(), gRenderer);
+
+    if (collisions.size() > 0)
+    {
+        auto collision_vector = Vec2(0, 0);
+
+        for (int i = 0; i < collisions.size(); i++)
+        {
+            auto collision_normal = collisions[i].contact.normal;
+            if ((collision_normal.x() > 0.f && player.rb.direction.x() < 0.f) || (collision_normal.x() < 0.f && player.rb.direction.x() > 0.f))
+            {
+                collision_vector = Vec2(1.f, collision_vector.y());
+                //player.rb.direction = Vec2(0.f, player.rb.direction.y());
+            }
+            if ((collision_normal.y() > 0.f && player.rb.direction.y() < 0.f) || (collision_normal.y() < 0.f && player.rb.direction.y() > 0.f))
+            {
+                collision_vector = Vec2(collision_vector.x(), 1.f);
+                //player.rb.direction = Vec2(player.rb.direction.x(), 0.f);
+            }
+        }
+
+        Vec2 currentDirection = Vec2(player.rb.direction.x(), player.rb.direction.y());
+        currentDirection.normalize();
+        auto collision_corrected_direction =
+            Vec2(currentDirection.x() - (currentDirection.x() * collision_vector.x()),
+                 currentDirection.y() - (currentDirection.y() * collision_vector.y()));
+
+        player.rb.aabb.center = player.rb.aabb.center + (collision_corrected_direction * player.rb.speed * Game::tick_delta());
+
+        //Need to handle entity collision in here too!
+
+        Game::UpdateCamera(player.rb.aabb.center);
+
+        UpdateEnemies();
+
+        CheckEnemyCollisions(quad);
+
+        return;
+    }
+
+    Game::UpdateCamera(player.rb.aabb.center);
+    UpdateEnemies();
+
+    auto enemyCollision = CheckEnemyCollisions(quad);
+    if (!enemyCollision)
+    {
+        Vec2 currentDirection = Vec2(player.rb.direction.x(), player.rb.direction.y());
+        currentDirection.normalize();
+        player.rb.aabb.center = player.rb.aabb.center + (currentDirection * player.rb.speed * Game::tick_delta());
+    }
+}
+
+void BuildQuadTree(QuadTree *quad, std::vector<Enemy> enemies)
+{
+    for (auto enemy : enemies)
+    {
+        quad->insert({enemy.id, enemy.rb.aabb.boundingBox()});
+    }
+
+    quad->insert({player.id, player.rb.aabb.boundingBox()});
 }
 
 void HandleInput(SDL_Event &event, bool &quit)
@@ -434,9 +464,9 @@ int main(int argc, char *args[])
 
     player = NewPlayer(&gRenderer, {100, 100});
     enemies.push_back(NewEnemy1(&gRenderer, {100, 180}));
-    enemies.push_back(NewEnemy1(&gRenderer, {200, 180}));
-    enemies.push_back(NewEnemy1(&gRenderer, {100, 280}));
-    enemies.push_back(NewEnemy1(&gRenderer, {200, 280}));
+    // enemies.push_back(NewEnemy1(&gRenderer, {200, 180}));
+    // enemies.push_back(NewEnemy1(&gRenderer, {100, 280}));
+    // enemies.push_back(NewEnemy1(&gRenderer, {200, 280}));
 
     QuadTree *quad = new QuadTree(0, {0, 0, 600, 600});
 
@@ -454,11 +484,10 @@ int main(int argc, char *args[])
         quad->clear();
 
         HandleInput(event, quit);
-        Update();
-
         BuildQuadTree(quad, enemies);
+        Update(quad);
 
-        CheckColliisions(quad);
+        //CheckEnemyCollisions(quad);
 
         render(gRenderer, gSpriteSheetTexture, loader, quad);
 

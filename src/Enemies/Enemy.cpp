@@ -46,7 +46,7 @@ void Enemy::deleteEnemy()
 
 void Enemy::beginAttack(Player &player)
 {
-    this->attack.readying_attack = true;
+    //this->attack.readying_attack = true;
     this->attack.target_position = player.rb.aabb.center;
 }
 
